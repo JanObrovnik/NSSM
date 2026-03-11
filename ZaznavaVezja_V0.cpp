@@ -10,6 +10,8 @@
 #include <string>
 #include <array>
 
+#include "UporabniskiVmesnik.h"
+
 
 
 void prepoznavaBarv_V0(cv::Mat slika) {
@@ -139,123 +141,45 @@ void prepoznajTekst(const std::string& pot, const int razsiritev = 10) {
 
 
 
-//int main() {
-//
-//	//std::string pot = "Seminar/Vhod/Text2.jpg";
-//	//prepoznajTekst(pot,5);
-//
-//	
-//	//cv::Mat slika = cv::imread(pot);
-//	//
-//	//if (slika.empty()) {
-//	//	std::cout << "Slike \"" << pot << "\" ni bilo mogoce odpreti.\n";
-//	//	return 1;
-//	//}
-//	//
-//	//
-//	////prepoznavaBarv_V0(slika);
-//	//
-//	//prepoznajTekst(slika);
-//	//
-//	//
-//	//cv::imshow("importImage()", slika);
-//	//cv::waitKey(0);
-//	////while (cv::waitKey(1) != 32) cv::imshow("importImage()", slika);
-//	//
-//	//cv::destroyAllWindows();
-//	//
-//	//
-//	//return 0;
-//
-//
-//	cv::Mat img(600, 800, CV_8UC3, cv::Scalar(255, 255, 255)); // Blue image
-//
-//	cv::namedWindow("Blank Image", cv::WINDOW_AUTOSIZE);
-//	cv::imshow("Blank Image", img);
-//	cv::waitKey(0);
-//
-//	cv::destroyAllWindows();
-//
-//}
-
-
-///////////////////////////////////////
-
-
-cv::Mat kontrolnaPlosca(80, 160, CV_8UC3, cv::Scalar(255, 255, 255));
-cv::Mat slika;
-
-enum GUMB {
-	VSI = -1,
-	LEVI,
-	DESNI
-};
-
-void urediKontrolo(const cv::Scalar barva, const GUMB gumb = VSI) {
-
-	int width = kontrolnaPlosca.cols;
-	int height = kontrolnaPlosca.rows;
-
-	if (gumb == VSI || gumb == LEVI) cv::rectangle(kontrolnaPlosca, cv::Point(5, 5), cv::Point(width / 2 - 5, height - 5), barva, -1);
-	if (gumb == VSI || gumb == DESNI) cv::rectangle(kontrolnaPlosca, cv::Point(width / 2 + 5, 5), cv::Point(width-5,height-5), barva, -1);
-}
-
-
-void naloziSliko(const GUMB gumb = VSI) {
-
-	static char index = 0;
-	const std::array<const std::string, 4> seznamPoti{ 
-		"Seminar/Vhod/Lik0.jpg","Seminar/Vhod/Lik1.jpg","Seminar/Vhod/Lik2.jpg","Seminar/Vhod/Lik3.jpg" };
-
-	if (gumb == LEVI) index--;
-	else if (gumb == DESNI) index++;
-
-	if (index == -1) index = seznamPoti.size() - 1;
-	else if (index == seznamPoti.size()) index = 0;
-
-	slika = cv::imread(seznamPoti[index]);
-	cv::imshow("Liki", slika);
-}
-
-
-// function which will be called on mouse input
-void nadzorKontrol(int action, int x, int y, int flags, void* userdata) {
-
-	if (action == cv::EVENT_LBUTTONDOWN || action == cv::EVENT_LBUTTONDBLCLK) {
-
-		//cv::putText(image, std::to_string(x) + " " + std::to_string(y), cv::Point(x, y), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 0));
-		if (x < kontrolnaPlosca.cols / 2) { urediKontrolo(cv::Scalar(255, 204, 204), LEVI); naloziSliko(LEVI); }
-		if (x > kontrolnaPlosca.cols / 2) { urediKontrolo(cv::Scalar(255, 204, 204), DESNI); naloziSliko(DESNI); }
-
-		imshow("Kontrolna plosca", kontrolnaPlosca);
-
-		
-	}
-	else if (action == cv::EVENT_LBUTTONUP) {
-		
-		urediKontrolo(cv::Scalar(255, 102, 102));
-		imshow("Kontrolna plosca", kontrolnaPlosca);
-
-		
-	}
-}
-
 int main() {
 
-	urediKontrolo(cv::Scalar(255, 102, 102));
-	naloziSliko();
 
-	cv::namedWindow("Kontrolna plosca");
-	cv::setMouseCallback("Kontrolna plosca", nadzorKontrol);
+	UporabniskiVmesnik uporabniskiVmesnik;
 
-	int k = 0;
-	while (k != 113) { // q
-		imshow("Kontrolna plosca", kontrolnaPlosca);
-		k = cv::waitKey(0);
-		//if (k == 99) { // c
-		//}
-	}
 
-	cv::destroyAllWindows();
-	return 0;
+	//std::string pot = "Seminar/Vhod/Text2.jpg";
+	//prepoznajTekst(pot,5);
+
+	
+	//cv::Mat slika = cv::imread(pot);
+	//
+	//if (slika.empty()) {
+	//	std::cout << "Slike \"" << pot << "\" ni bilo mogoce odpreti.\n";
+	//	return 1;
+	//}
+	//
+	//
+	////prepoznavaBarv_V0(slika);
+	//
+	//prepoznajTekst(slika);
+	//
+	//
+	//cv::imshow("importImage()", slika);
+	//cv::waitKey(0);
+	////while (cv::waitKey(1) != 32) cv::imshow("importImage()", slika);
+	//
+	//cv::destroyAllWindows();
+	//
+	//
+	//return 0;
+
+
+	//cv::Mat img(600, 800, CV_8UC3, cv::Scalar(255, 255, 255)); // Blue image
+	//
+	//cv::namedWindow("Blank Image", cv::WINDOW_AUTOSIZE);
+	//cv::imshow("Blank Image", img);
+	//cv::waitKey(0);
+	//
+	//cv::destroyAllWindows();
+
 }
