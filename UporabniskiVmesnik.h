@@ -5,6 +5,7 @@
 #include <opencv2/opencv.hpp>
 
 #include <iostream>
+#include <filesystem>
 #include <string>
 #include <array>
 
@@ -21,13 +22,16 @@ const int stGumbov = 4;
 
 class UporabniskiVmesnik {
 
-public:
+private:
 	cv::Mat kontrolnaPlosca;
 	cv::Mat slika;
+	const std::string& vhod, izhod;
+	std::vector<std::string> seznamPoti;
 
-	UporabniskiVmesnik();
+public:
+	UporabniskiVmesnik(const std::string& vhod, const std::string& izhod);
 
-
+private:
 	void urediKontrolo(const cv::Scalar& barva, const GUMB& gumb = VSI);
 
 	void naloziSliko(const GUMB& gumb = VSI);
@@ -36,3 +40,6 @@ public:
 	void nadzorKontrol(int action, int x, int y, int flags);
 	void pritisnjenGumb(const cv::Scalar& barva, const GUMB& gumb = VSI);
 };
+
+
+std::vector<std::string> preberiMapo(const std::string& pot);

@@ -7,6 +7,7 @@
 #include <leptonica/allheaders.h>
 
 #include <iostream>
+#include <filesystem>
 #include <string>
 #include <array>
 
@@ -141,10 +142,17 @@ void prepoznajTekst(const std::string& pot, const int razsiritev = 10) {
 
 
 
+
+
 int main() {
 
 
-	UporabniskiVmesnik uporabniskiVmesnik;
+	const std::string& potVhod = "Seminar/Vhod";
+	const std::string& potIzhod = "Seminar/Izhod";
+
+	UporabniskiVmesnik uporabniskiVmesnik(potVhod, potIzhod);
+
+
 
 
 	//std::string pot = "Seminar/Vhod/Text2.jpg";
@@ -182,4 +190,7 @@ int main() {
 	//
 	//cv::destroyAllWindows();
 
+
+
+	return 0;
 }

@@ -1,7 +1,8 @@
 #include "UporabniskiVmesnik.h"
 
 
-UporabniskiVmesnik::UporabniskiVmesnik() : kontrolnaPlosca(80, 80 * stGumbov, CV_8UC3, cv::Scalar(255, 255, 255)) {
+UporabniskiVmesnik::UporabniskiVmesnik(const std::string& vhod, const std::string& izhod) : 
+	kontrolnaPlosca(80, 80 * stGumbov, CV_8UC3, cv::Scalar(255, 255, 255)), vhod(vhod), izhod(izhod), seznamPoti(preberiMapo(vhod)) {
 
 	cv::namedWindow("Kontrolna plosca");
 	cv::setMouseCallback("Kontrolna plosca", onMouse, this);
@@ -9,6 +10,7 @@ UporabniskiVmesnik::UporabniskiVmesnik() : kontrolnaPlosca(80, 80 * stGumbov, CV
 	urediKontrolo(cv::Scalar(255, 102, 102));
 	naloziSliko();
 
+	std::cout << "dela\n";
 
 	while (int k = cv::waitKey(0) != 113) { // q
 		
@@ -47,8 +49,6 @@ void UporabniskiVmesnik::urediKontrolo(const cv::Scalar& barva, const GUMB& gumb
 void UporabniskiVmesnik::naloziSliko(const GUMB& gumb) {
 
 	static char index = 0;
-	const std::array<const std::string, 4> seznamPoti{
-		"Seminar/Vhod/Lik0.jpg","Seminar/Vhod/Lik1.jpg","Seminar/Vhod/Lik2.jpg","Seminar/Vhod/Lik3.jpg" };
 
 	if (gumb == LEVI) index--;
 	else if (gumb == DESNI) index++;
@@ -114,4 +114,27 @@ void UporabniskiVmesnik::pritisnjenGumb(const cv::Scalar& barva, const GUMB& gum
 	default:
 		break;
 	}
+}
+
+
+
+std::vector<std::string> preberiMapo(const std::string& pot) {
+
+	std::vector<std::string> resitev;
+
+	if (!std::filesystem::exists(pot)) {
+		std::cout << "Mape ni bilo mogoce najti.\n";
+		return resitev;
+	}
+
+	for (const auto& entry : std::filesystem::directory_iterator(pot)) {
+		if (entry.is_regular_file()) {
+			resitev.push_back(pot + "/" + entry.path().filename().string());
+		}
+		else {
+			std::cout << "Neprepoznana datoteka: " << entry.path().filename().string() << '\n';
+		}
+	}
+
+	return resitev;
 }
