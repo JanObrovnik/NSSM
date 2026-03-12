@@ -55,7 +55,7 @@ void UporabniskiVmesnik::naloziSliko(const GUMB& gumb) {
 	else if (index == seznamPoti.size()) index = 0;
 
 	slika = cv::imread(seznamPoti[index]);
-	cv::imshow("Liki", slika);
+	cv::imshow("Slika", slika);
 }
 
 
@@ -99,14 +99,20 @@ void UporabniskiVmesnik::pritisnjenGumb(const cv::Scalar& barva, const GUMB& gum
 		naloziSliko(DESNI);
 		break;
 	
+	case BARVA:
+		urediKontrolo(barva, BARVA);
+		prepoznavaBarv_V0(slika);
+		break;
+
 	case BERI:
 		urediKontrolo(barva, BERI);
-		///////////////////////////////
+		cv::waitKey(1);
+		prepoznajTekst_V0(slika);
 		break;
-	
+
 	case BRISI:
 		urediKontrolo(barva, BRISI);
-		///////////////////////////////
+		naloziSliko(VSI);
 		break;
 	
 	default:

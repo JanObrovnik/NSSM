@@ -9,11 +9,15 @@
 #include <string>
 #include <array>
 
+#include "Logika.h"
+
+
 
 enum GUMB {
 	VSI = -1,
 	LEVI,
 	DESNI,
+	BARVA,
 	BERI,
 	BRISI,
 	kolicina
