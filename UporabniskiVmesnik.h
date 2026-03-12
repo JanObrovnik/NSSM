@@ -15,9 +15,9 @@ enum GUMB {
 	LEVI,
 	DESNI,
 	BERI,
-	BRISI
+	BRISI,
+	kolicina
 };
-const int stGumbov = 4;
 
 
 class UporabniskiVmesnik {
@@ -29,7 +29,7 @@ private:
 	std::vector<std::string> seznamPoti;
 
 public:
-	UporabniskiVmesnik(const std::string& vhod, const std::string& izhod);
+	UporabniskiVmesnik(std::string& vhod, std::string& izhod);
 
 private:
 	void urediKontrolo(const cv::Scalar& barva, const GUMB& gumb = VSI);
@@ -42,4 +42,4 @@ private:
 };
 
 
-std::vector<std::string> preberiMapo(const std::string& pot);
+std::vector<std::string> preberiMapo(std::string& pot);
