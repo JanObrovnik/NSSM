@@ -4,6 +4,9 @@
 UporabniskiVmesnik::UporabniskiVmesnik(std::string& vhod, std::string& izhod) : 
 	kontrolnaPlosca(80, 80 * GUMB::kolicina, CV_8UC3, cv::Scalar(255, 255, 255)), vhod(vhod), izhod(izhod), seznamPoti(preberiMapo(vhod)) {
 
+	seznamKontrolnihIkon = (preberiMapo("C:/Users/janob/Desktop/Faks/NapredniSenzorskiSistemi/CPP/ProjektNSSM/ProjektNSSM/Seminar/Resources"));
+	std::sort(seznamKontrolnihIkon.begin(), seznamKontrolnihIkon.end());
+
 	cv::namedWindow("Kontrolna plosca");
 	cv::setMouseCallback("Kontrolna plosca", onMouse, this);
 
@@ -24,47 +27,22 @@ UporabniskiVmesnik::UporabniskiVmesnik(std::string& vhod, std::string& izhod) :
 
 void UporabniskiVmesnik::urediKontrolo(const cv::Scalar& barva, const GUMB& gumb) {
 
-	static std::array<cv::Scalar, GUMB::kolicina> spominBarv;
-	
-	if (gumb == VSI) 
-		for (cv::Scalar& s : spominBarv)
-			s = barva;
-	else
-		spominBarv[gumb] = barva;
-
 	const int& width = kontrolnaPlosca.cols;
 	const int& height = kontrolnaPlosca.rows;
 
 	if (gumb == VSI)
-		for (int i = 0; i < GUMB::kolicina; i++)
-			cv::rectangle(kontrolnaPlosca, cv::Point(i * width / GUMB::kolicina + 5, 5), cv::Point((i + 1) * width / GUMB::kolicina - 5, height - 5), spominBarv[i], -1);
-	else
-		cv::rectangle(kontrolnaPlosca, cv::Point(gumb * width / GUMB::kolicina + 5, 5), cv::Point((gumb + 1) * width / GUMB::kolicina - 5, height - 5), barva, -1);
-
-
-	////////////////////////////////////////////////////
-	
-	cv::Mat small_image = cv::imread("C:/Users/janob/Desktop/Faks/NapredniSenzorskiSistemi/CPP/ProjektNSSM/ProjektNSSM/Image.bmp", cv::IMREAD_UNCHANGED); // Use IMREAD_UNCHANGED to preserve transparency
-
-	int x = 0;
-	int y = 0;
-
-	cv::Rect roi(x, y, small_image.cols, small_image.rows);
-
-	small_image.copyTo(kontrolnaPlosca(roi));
-
-	
-	/////////////////////////////////////////////
-
-	if (gumb == LEVI) {
-		cv::Mat roi2 = kontrolnaPlosca(cv::Rect(0, 0, 80, 80));
+		for (int i = 0; i < GUMB::kolicina; i++) {
+			cv::Mat ikona = cv::imread(seznamKontrolnihIkon[i], cv::IMREAD_UNCHANGED);
+			cv::Rect roi(i * width / GUMB::kolicina, 0, ikona.cols, ikona.rows);
+			ikona.copyTo(kontrolnaPlosca(roi));
+		}
+	else {
+		cv::Mat roi = kontrolnaPlosca(cv::Rect(gumb * width / GUMB::kolicina, 0, 80, 80));
 		cv::Mat color(roi.size(), CV_8UC3, cv::Scalar(255, 255, 255));
 		double alpha = 0.3;
-		cv::addWeighted(color, alpha, roi2, 1.0 - alpha, 0.0, roi2);
+		cv::addWeighted(color, alpha, roi, 1.0 - alpha, 0.0, roi);
 	}
-	////////////////////////////////////////////////
-
-
+			
 	imshow("Kontrolna plosca", kontrolnaPlosca);
 }
 
@@ -107,40 +85,35 @@ void UporabniskiVmesnik::nadzorKontrol(int action, int x, int y, int flags) {
 
 void UporabniskiVmesnik::pritisnjenGumb(const cv::Scalar& barva, const GUMB& gumb) {
 
+	urediKontrolo(barva, gumb);
+
 	switch (gumb) {
 
 	case VSI:
-		urediKontrolo(barva);
 		break;
 	
 	case LEVI:
-		urediKontrolo(barva, gumb);
 		naloziSliko(LEVI);
 		break;
 	
 	case DESNI:
-		urediKontrolo(barva, gumb);
 		naloziSliko(DESNI);
 		break;
 	
 	case BARVA:
-		urediKontrolo(barva, gumb);
 		prepoznavaBarv_V0(slika);
 		break;
 
 	case ZICA:
-		urediKontrolo(barva, gumb);
 		prepoznavaZic_V0(slika);
 		break;
 
 	case BERI:
-		urediKontrolo(barva, gumb);
 		cv::waitKey(1);
 		prepoznajTekst_V0(slika);
 		break;
 
 	case BRISI:
-		urediKontrolo(barva, gumb);
 		naloziSliko(VSI);
 		break;
 	
@@ -151,13 +124,13 @@ void UporabniskiVmesnik::pritisnjenGumb(const cv::Scalar& barva, const GUMB& gum
 
 
 
-std::vector<std::string> preberiMapo(std::string& pot) {
+std::vector<std::string> preberiMapo(std::string pot) {
 
 	std::vector<std::string> resitev;
 
 	while (!std::filesystem::exists(pot)) {
-		std::cout << "Mape ni bilo mogoce najti.\n";
-		std::cout << "Podajte novo mapo: \n";
+		std::cout << "Mape "<< pot <<" ni bilo mogoce najti.\n";
+		std::cout << "Podajte novo mapo: ";
 		std::cin >> pot;
 	}
 

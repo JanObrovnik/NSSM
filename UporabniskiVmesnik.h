@@ -8,6 +8,7 @@
 #include <filesystem>
 #include <string>
 #include <array>
+#include <algorithm>
 
 #include "Logika.h"
 
@@ -32,6 +33,7 @@ private:
 	cv::Mat slika;
 	const std::string& vhod, izhod;
 	std::vector<std::string> seznamPoti;
+	std::vector<std::string> seznamKontrolnihIkon;
 
 public:
 	UporabniskiVmesnik(std::string& vhod, std::string& izhod);
@@ -47,4 +49,4 @@ private:
 };
 
 
-std::vector<std::string> preberiMapo(std::string& pot);
+std::vector<std::string> preberiMapo(std::string pot);
