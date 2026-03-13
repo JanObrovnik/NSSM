@@ -7,25 +7,21 @@ UporabniskiVmesnik::UporabniskiVmesnik(std::string& vhod, std::string& izhod) :
 	seznamKontrolnihIkon = (preberiMapo("C:/Users/janob/Desktop/Faks/NapredniSenzorskiSistemi/CPP/ProjektNSSM/ProjektNSSM/Seminar/Resources"));
 	std::sort(seznamKontrolnihIkon.begin(), seznamKontrolnihIkon.end());
 
+	indexTab = -1;
+
 	cv::namedWindow("Kontrolna plosca");
 	cv::setMouseCallback("Kontrolna plosca", onMouse, this);
 
-	urediKontrolo(cv::Scalar(255, 102, 102));
+	urediKontrolo();
 	naloziSliko();
 
-	while (int k = cv::waitKey(0) != 113) { // q
-		
-		//std::cout << "znak: " << k << '\n';
-		
-		//if (k == 99) { // c
-		//}
-	}
+	while (pritisnjenaTipka(cv::waitKey(0)));
 
 	cv::destroyAllWindows();
 }
 
 
-void UporabniskiVmesnik::urediKontrolo(const cv::Scalar& barva, const GUMB& gumb) {
+void UporabniskiVmesnik::urediKontrolo(const GUMB& gumb) {
 
 	const int& width = kontrolnaPlosca.cols;
 	const int& height = kontrolnaPlosca.rows;
@@ -42,9 +38,14 @@ void UporabniskiVmesnik::urediKontrolo(const cv::Scalar& barva, const GUMB& gumb
 		double alpha = 0.3;
 		cv::addWeighted(color, alpha, roi, 1.0 - alpha, 0.0, roi);
 	}
-			
+	
+	if (indexTab > VSI && indexTab < GUMB::kolicina) {
+		cv::rectangle(kontrolnaPlosca, cv::Point(indexTab * width / GUMB::kolicina + 5, 5), cv::Point((indexTab + 1) * width / GUMB::kolicina - 5, height - 5), cv::Scalar(0, 0, 255));
+	}
+
 	imshow("Kontrolna plosca", kontrolnaPlosca);
 }
+
 
 void UporabniskiVmesnik::naloziSliko(const GUMB& gumb) {
 
@@ -73,19 +74,20 @@ void UporabniskiVmesnik::nadzorKontrol(int action, int x, int y, int flags) {
 
 		for (int i = 0; i < GUMB::kolicina; i++) {
 			if (x > i * kontrolnaPlosca.cols / GUMB::kolicina && x < (i + 1) * kontrolnaPlosca.cols / GUMB::kolicina) {
-				pritisnjenGumb(cv::Scalar(255, 204, 204), (GUMB)i);
+				pritisnjenGumb((GUMB)i);
 			}
 		}
 	}
 	else if (action == cv::EVENT_LBUTTONUP) {
 
-		pritisnjenGumb(cv::Scalar(255, 102, 102));
+		pritisnjenGumb();
 	}
 }
 
-void UporabniskiVmesnik::pritisnjenGumb(const cv::Scalar& barva, const GUMB& gumb) {
+void UporabniskiVmesnik::pritisnjenGumb(const GUMB& gumb) {
 
-	urediKontrolo(barva, gumb);
+	urediKontrolo(gumb);
+	cv::waitKey(1);
 
 	switch (gumb) {
 
@@ -109,7 +111,6 @@ void UporabniskiVmesnik::pritisnjenGumb(const cv::Scalar& barva, const GUMB& gum
 		break;
 
 	case BERI:
-		cv::waitKey(1);
 		prepoznajTekst_V0(slika);
 		break;
 
@@ -120,6 +121,57 @@ void UporabniskiVmesnik::pritisnjenGumb(const cv::Scalar& barva, const GUMB& gum
 	default:
 		break;
 	}
+}
+
+
+bool UporabniskiVmesnik::pritisnjenaTipka(const int& tipka) {
+
+	std::cout << "tipka: " << tipka << '\n';
+
+	if (tipka == 113) // q
+		return false;
+
+	pritisnjenGumb();
+
+	switch (tipka) {
+
+	case 9: // tab
+		indexTab++;
+		if (indexTab == GUMB::kolicina) indexTab = -1;
+		urediKontrolo();
+		break;
+	case 13: // enter
+		pritisnjenGumb((GUMB)indexTab);
+		break;
+
+	case 97: // a
+		pritisnjenGumb(LEVI);
+		break;
+	case 115: // s
+		pritisnjenGumb(DESNI);
+		break;
+	case 100: // d
+		pritisnjenGumb(BARVA);
+		break;
+	case 102: // f
+		pritisnjenGumb(ZICA);
+		break;
+	case 103: // g
+		pritisnjenGumb(BERI);
+		break;
+	case 104: // h
+		pritisnjenGumb(BRISI);
+		break;
+	case 106: // j
+		pritisnjenGumb(); //////////////////////// SHRANI
+		break;
+
+	default:
+		break;
+	}
+
+
+	return true;
 }
 
 

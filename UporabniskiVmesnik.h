@@ -21,7 +21,7 @@ enum GUMB {
 	BARVA,
 	ZICA,
 	BERI,
-	BRISI,
+	BRISI, ///////////// SHRANI se dodat
 	kolicina
 };
 
@@ -34,18 +34,21 @@ private:
 	const std::string& vhod, izhod;
 	std::vector<std::string> seznamPoti;
 	std::vector<std::string> seznamKontrolnihIkon;
+	int indexTab;
 
 public:
 	UporabniskiVmesnik(std::string& vhod, std::string& izhod);
 
 private:
-	void urediKontrolo(const cv::Scalar& barva, const GUMB& gumb = VSI);
+	void urediKontrolo(const GUMB& gumb = VSI);
 
 	void naloziSliko(const GUMB& gumb = VSI);
 
 	static void onMouse(int event, int x, int y, int flags, void* userdata);
 	void nadzorKontrol(int action, int x, int y, int flags);
-	void pritisnjenGumb(const cv::Scalar& barva, const GUMB& gumb = VSI);
+	void pritisnjenGumb(const GUMB& gumb = VSI);
+
+	bool pritisnjenaTipka(const int& tipka);
 };
 
 
