@@ -18,6 +18,7 @@ enum GUMB {
 	LEVI,
 	DESNI,
 	BARVA,
+	ZICA,
 	BERI,
 	BRISI,
 	kolicina

@@ -57,8 +57,7 @@ void prepoznavaBarv_V0(cv::Mat slika) {
 
 void prepoznavaZic_V0(cv::Mat slika) {
 
-
-
+	/////////////////////////////
 
 
 }
@@ -102,12 +101,12 @@ void prepoznajTekst_V0(cv::Mat slika, const int razsiritev) {
 			std::string outText = std::string(ocr.GetUTF8Text());
 			//std::cout << "zaznan text: " << outText << '\n' << '\n';
 
-			cv::rectangle(obdelanaSlika, cv::Rect(novX, novY, novW, novH), cv::Scalar(0, 255, 0));
+			cv::rectangle(slika, cv::Rect(novX, novY, novW, novH), cv::Scalar(0, 255, 0));
 		}
 		boxaDestroy(&boxes);
 	}
 
-	cv::imshow("Slika", obdelanaSlika);
+	cv::imshow("Slika", slika);
 
 	ocr.End();
 }

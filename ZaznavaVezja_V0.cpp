@@ -1,15 +1,4 @@
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/opencv.hpp>
-
-#include <tesseract/baseapi.h>
-#include <leptonica/allheaders.h>
-
-#include <iostream>
-#include <filesystem>
 #include <string>
-#include <array>
 
 #include "UporabniskiVmesnik.h"
 

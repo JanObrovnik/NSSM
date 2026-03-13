@@ -41,6 +41,30 @@ void UporabniskiVmesnik::urediKontrolo(const cv::Scalar& barva, const GUMB& gumb
 	else
 		cv::rectangle(kontrolnaPlosca, cv::Point(gumb * width / GUMB::kolicina + 5, 5), cv::Point((gumb + 1) * width / GUMB::kolicina - 5, height - 5), barva, -1);
 
+
+	////////////////////////////////////////////////////
+	
+	cv::Mat small_image = cv::imread("C:/Users/janob/Desktop/Faks/NapredniSenzorskiSistemi/CPP/ProjektNSSM/ProjektNSSM/Image.bmp", cv::IMREAD_UNCHANGED); // Use IMREAD_UNCHANGED to preserve transparency
+
+	int x = 0;
+	int y = 0;
+
+	cv::Rect roi(x, y, small_image.cols, small_image.rows);
+
+	small_image.copyTo(kontrolnaPlosca(roi));
+
+	
+	/////////////////////////////////////////////
+
+	if (gumb == LEVI) {
+		cv::Mat roi2 = kontrolnaPlosca(cv::Rect(0, 0, 80, 80));
+		cv::Mat color(roi.size(), CV_8UC3, cv::Scalar(255, 255, 255));
+		double alpha = 0.3;
+		cv::addWeighted(color, alpha, roi2, 1.0 - alpha, 0.0, roi2);
+	}
+	////////////////////////////////////////////////
+
+
 	imshow("Kontrolna plosca", kontrolnaPlosca);
 }
 
@@ -90,28 +114,33 @@ void UporabniskiVmesnik::pritisnjenGumb(const cv::Scalar& barva, const GUMB& gum
 		break;
 	
 	case LEVI:
-		urediKontrolo(barva, LEVI);
+		urediKontrolo(barva, gumb);
 		naloziSliko(LEVI);
 		break;
 	
 	case DESNI:
-		urediKontrolo(barva, DESNI);
+		urediKontrolo(barva, gumb);
 		naloziSliko(DESNI);
 		break;
 	
 	case BARVA:
-		urediKontrolo(barva, BARVA);
+		urediKontrolo(barva, gumb);
 		prepoznavaBarv_V0(slika);
 		break;
 
+	case ZICA:
+		urediKontrolo(barva, gumb);
+		prepoznavaZic_V0(slika);
+		break;
+
 	case BERI:
-		urediKontrolo(barva, BERI);
+		urediKontrolo(barva, gumb);
 		cv::waitKey(1);
 		prepoznajTekst_V0(slika);
 		break;
 
 	case BRISI:
-		urediKontrolo(barva, BRISI);
+		urediKontrolo(barva, gumb);
 		naloziSliko(VSI);
 		break;
 	
