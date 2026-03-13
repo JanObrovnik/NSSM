@@ -61,6 +61,13 @@ void UporabniskiVmesnik::naloziSliko(const GUMB& gumb) {
 	cv::imshow("Slika", slika);
 }
 
+void UporabniskiVmesnik::shraniSliko() {
+
+	static int index = 0;
+
+	cv::imwrite((izhod + "/" + std::to_string(index++) + ".jpg"), slika);
+}
+
 
 void UporabniskiVmesnik::onMouse(int event, int x, int y, int flags, void* userdata) {
 
@@ -117,6 +124,10 @@ void UporabniskiVmesnik::pritisnjenGumb(const GUMB& gumb) {
 	case BRISI:
 		naloziSliko(VSI);
 		break;
+
+	case SHRANI:
+		shraniSliko();
+		break;
 	
 	default:
 		break;
@@ -126,7 +137,7 @@ void UporabniskiVmesnik::pritisnjenGumb(const GUMB& gumb) {
 
 bool UporabniskiVmesnik::pritisnjenaTipka(const int& tipka) {
 
-	std::cout << "tipka: " << tipka << '\n';
+	//std::cout << "tipka: " << tipka << '\n';
 
 	if (tipka == 113) // q
 		return false;
@@ -163,13 +174,12 @@ bool UporabniskiVmesnik::pritisnjenaTipka(const int& tipka) {
 		pritisnjenGumb(BRISI);
 		break;
 	case 106: // j
-		pritisnjenGumb(); //////////////////////// SHRANI
+		pritisnjenGumb(SHRANI);
 		break;
 
 	default:
 		break;
 	}
-
 
 	return true;
 }

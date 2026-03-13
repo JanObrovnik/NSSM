@@ -21,7 +21,8 @@ enum GUMB {
 	BARVA,
 	ZICA,
 	BERI,
-	BRISI, ///////////// SHRANI se dodat
+	BRISI,
+	SHRANI,
 	kolicina
 };
 
@@ -43,6 +44,7 @@ private:
 	void urediKontrolo(const GUMB& gumb = VSI);
 
 	void naloziSliko(const GUMB& gumb = VSI);
+	void shraniSliko();
 
 	static void onMouse(int event, int x, int y, int flags, void* userdata);
 	void nadzorKontrol(int action, int x, int y, int flags);
