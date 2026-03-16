@@ -69,23 +69,19 @@ void UporabniskiVmesnik::shraniSliko() {
 }
 
 
-void UporabniskiVmesnik::onMouse(int event, int x, int y, int flags, void* userdata) {
+void UporabniskiVmesnik::onMouse(int dogodek, int x, int y, int flags, void* userdata) {
 
 	UporabniskiVmesnik* instance = static_cast<UporabniskiVmesnik*>(userdata);
-	instance->nadzorKontrol(event, x, y, flags);
+	instance->nadzorKontrol(dogodek, x, y, flags);
 }
 
-void UporabniskiVmesnik::nadzorKontrol(int action, int x, int y, int flags) {
+void UporabniskiVmesnik::nadzorKontrol(int dogodek, int x, int y, int flags) {
 
-	if (action == cv::EVENT_LBUTTONDOWN || action == cv::EVENT_LBUTTONDBLCLK) {
+	if (dogodek == cv::EVENT_LBUTTONDOWN || dogodek == cv::EVENT_LBUTTONDBLCLK) {
 
-		for (int i = 0; i < GUMB::kolicina; i++) {
-			if (x > i * kontrolnaPlosca.cols / GUMB::kolicina && x < (i + 1) * kontrolnaPlosca.cols / GUMB::kolicina) {
-				pritisnjenGumb((GUMB)i);
-			}
-		}
+		pritisnjenGumb(static_cast<GUMB>(x / (kontrolnaPlosca.cols / GUMB::kolicina)));
 	}
-	else if (action == cv::EVENT_LBUTTONUP) {
+	else if (dogodek == cv::EVENT_LBUTTONUP) {
 
 		pritisnjenGumb();
 	}
@@ -152,7 +148,7 @@ bool UporabniskiVmesnik::pritisnjenaTipka(const int& tipka) {
 		urediKontrolo();
 		break;
 	case 13: // enter
-		pritisnjenGumb((GUMB)indexTab);
+		pritisnjenGumb(static_cast<GUMB>(indexTab));
 		break;
 
 	case 97: // a

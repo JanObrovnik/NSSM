@@ -46,8 +46,8 @@ private:
 	void naloziSliko(const GUMB& gumb = VSI);
 	void shraniSliko();
 
-	static void onMouse(int event, int x, int y, int flags, void* userdata);
-	void nadzorKontrol(int action, int x, int y, int flags);
+	static void onMouse(int dogodek, int x, int y, int flags, void* userdata);
+	void nadzorKontrol(int dogodek, int x, int y, int flags);
 	void pritisnjenGumb(const GUMB& gumb = VSI);
 
 	bool pritisnjenaTipka(const int& tipka);
