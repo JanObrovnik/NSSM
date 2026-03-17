@@ -17,5 +17,8 @@
 void prepoznavaBarv_V0(cv::Mat slika);
 
 void prepoznavaZic_V0(cv::Mat slika);
+cv::Point sredinaTock_V0(const std::vector<cv::Point>& seznamTock);
+std::vector<cv::Point> sredinaTock_V1(const std::vector<cv::Point>& seznamTock);
+inline int manhattanRazdalja(const cv::Point& to1, const cv::Point& to2);
 
 void prepoznajTekst_V0(cv::Mat slika, const int razsiritev = 10);
