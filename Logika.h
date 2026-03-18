@@ -31,7 +31,8 @@ inline int manhattanRazdalja(const cv::Point& to1, const cv::Point& to2);
 void horizontalnaPoravnava_V0(cv::Mat slika, std::vector<cv::Point>& seznamTock); //- stara verzija
 void horizontalnaPoravnava_V1(cv::Mat slika, std::vector<cv::Point>& seznamTock);
 
-void narisiPovezave_V0(cv::Mat slika, std::vector<cv::Point> seznamTock);
+std::vector<cv::Point> narisiPovezave_V0(cv::Mat slika, const std::vector<cv::Point>& seznamTock, const cv::Point& zacetnaTocka);
+std::vector<int> narediSeznamRazdalj(const std::vector<cv::Point>& seznamTock);
 
 
 void prepoznajTekst_V0(cv::Mat slika, const int razsiritev = 10);

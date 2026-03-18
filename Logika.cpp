@@ -128,7 +128,93 @@ std::vector<cv::Point> vertikalnaPrepoznava(cv::Mat slika) {
 	cv::imshow("Slika", slika);
 	cv::waitKey(200);
 
-	narisiPovezave_V0(slika, resitev); ////////////////////
+	std::vector<cv::Point> urejenSeznamTock = narisiPovezave_V0(slika, resitev, resitev.back()); /////////////////////////////
+	//std::vector<cv::Point> urejenSeznamTock = narisiPovezave_V0(slika, resitev, *(resitev.begin() + 10));
+	std::vector<int> urejenSeznamRazdalj = narediSeznamRazdalj(urejenSeznamTock);
+
+	for (int i = 1; i < urejenSeznamTock.size(); i++) {
+		cv::line(slika, urejenSeznamTock[i - 1], urejenSeznamTock[i], cv::Scalar(255, 0, 102), 3);
+	}
+
+	std::vector<int>::iterator itMax = std::max_element(urejenSeznamRazdalj.begin(), urejenSeznamRazdalj.end());
+	int index = itMax - urejenSeznamRazdalj.begin();
+	int najvecjaRazdalja = *itMax;
+
+	if (index == 0) {
+		std::vector<cv::Point> novUrejenSeznamTock = narisiPovezave_V0(slika, urejenSeznamTock, urejenSeznamTock.front());
+		std::vector<int> novUrejenSeznamRazdalj = narediSeznamRazdalj(novUrejenSeznamTock);
+
+		std::vector<int>::iterator novItMax = std::max_element(novUrejenSeznamRazdalj.begin(), novUrejenSeznamRazdalj.end());
+		int novIndex = novItMax - novUrejenSeznamRazdalj.begin();
+		int novaNajvecjaRazdalja = *novItMax;
+
+		if (novaNajvecjaRazdalja > najvecjaRazdalja) {
+			urejenSeznamTock = novUrejenSeznamTock;
+			urejenSeznamRazdalj = novUrejenSeznamRazdalj;
+			najvecjaRazdalja = novaNajvecjaRazdalja;
+		}
+
+		novUrejenSeznamTock = narisiPovezave_V0(slika, urejenSeznamTock, urejenSeznamTock.back());
+		novUrejenSeznamRazdalj = narediSeznamRazdalj(novUrejenSeznamTock);
+
+		novItMax = std::max_element(novUrejenSeznamRazdalj.begin(), novUrejenSeznamRazdalj.end());
+		novIndex = novItMax - novUrejenSeznamRazdalj.begin();
+		novaNajvecjaRazdalja = *novItMax;
+
+		if (novaNajvecjaRazdalja > najvecjaRazdalja) {
+			urejenSeznamTock = novUrejenSeznamTock;
+			urejenSeznamRazdalj = novUrejenSeznamRazdalj;
+			najvecjaRazdalja = novaNajvecjaRazdalja;
+		}
+
+
+		std::cout << "dela.\n";
+	}
+	else {
+		//int novaNajvecjaRazdalja = manhattanRazdalja(resitev[index], resitev[index - 1]);
+		//std::cout << "najvecja razdalja: " << novaNajvecjaRazdalja << ':' << resitev[index] << '|' << resitev[index - 1] << '\n';
+		//if (novaNajvecjaRazdalja > najvecjaRazdalja)
+		//	najvecjaRazdalja = novaNajvecjaRazdalja;
+
+		std::vector<cv::Point> novUrejenSeznamTock = narisiPovezave_V0(slika, urejenSeznamTock, urejenSeznamTock[index]);
+		std::vector<int> novUrejenSeznamRazdalj = narediSeznamRazdalj(novUrejenSeznamTock);
+
+		std::vector<int>::iterator novItMax = std::max_element(novUrejenSeznamRazdalj.begin(), novUrejenSeznamRazdalj.end());
+		int novIndex = novItMax - novUrejenSeznamRazdalj.begin();
+		int novaNajvecjaRazdalja = *novItMax;
+
+		if (novaNajvecjaRazdalja > najvecjaRazdalja) {
+			urejenSeznamTock = novUrejenSeznamTock;
+			urejenSeznamRazdalj = novUrejenSeznamRazdalj;
+			najvecjaRazdalja = novaNajvecjaRazdalja;
+		}
+
+		novUrejenSeznamTock = narisiPovezave_V0(slika, urejenSeznamTock, urejenSeznamTock[index - 1]);
+		novUrejenSeznamRazdalj = narediSeznamRazdalj(novUrejenSeznamTock);
+
+		novItMax = std::max_element(novUrejenSeznamRazdalj.begin(), novUrejenSeznamRazdalj.end());
+		novIndex = novItMax - novUrejenSeznamRazdalj.begin();
+		novaNajvecjaRazdalja = *novItMax;
+
+		if (novaNajvecjaRazdalja > najvecjaRazdalja) {
+			urejenSeznamTock = novUrejenSeznamTock;
+			urejenSeznamRazdalj = novUrejenSeznamRazdalj;
+			najvecjaRazdalja = novaNajvecjaRazdalja;
+		}
+
+		std::cout << "cakanje.\n";
+	}
+
+
+
+
+	for (int i = 1; i < urejenSeznamTock.size(); i++) {
+		cv::line(slika, urejenSeznamTock[i - 1], urejenSeznamTock[i], cv::Scalar(255, 255, 0));
+	}
+	//cv::line(slika, urejenSeznamTock.front(), urejenSeznamTock.back(), cv::Scalar(255, 255, 0));
+
+	cv::imshow("Slika", slika);
+	cv::waitKey(200);
 
 
 	return resitev;
@@ -227,19 +313,27 @@ void horizontalnaPoravnava_V1(cv::Mat slika, std::vector<cv::Point>& seznamTock)
 	}
 }
 
-void narisiPovezave_V0(cv::Mat slika, std::vector<cv::Point> seznamTock) {
+std::vector<cv::Point> narisiPovezave_V0(cv::Mat slika, const std::vector<cv::Point>& seznamTock, const cv::Point& zacetnaTocka) {
+	///////////////////// slike ne rabimo
+	static bool prvic = true;
+	static int najvecjaRazdalja = 0;
 
-	cv::Point tekocaTocka = seznamTock.back();
-	seznamTock.pop_back();
+	std::vector<cv::Point> seznamTockKopija = seznamTock;
 
-	std::vector<cv::Point> urejenSeznamTock{tekocaTocka};
+	cv::Point tekocaTocka = zacetnaTocka;
+	seznamTockKopija.erase(std::find(seznamTockKopija.begin(), seznamTockKopija.end(), tekocaTocka));
 
-	while (!seznamTock.empty()) {
+	//cv::Point tekocaTocka = *(seznamTock.begin() + 5);
+	//seznamTock.erase(seznamTock.begin() + 5);
 
-		std::vector<cv::Point>::reverse_iterator itMin = seznamTock.rbegin();
+	std::vector<cv::Point> resitev{tekocaTocka };
+
+	while (!seznamTockKopija.empty()) {
+
+		std::vector<cv::Point>::reverse_iterator itMin = seznamTockKopija.rbegin();
 		int vrednostMin = manhattanRazdalja(tekocaTocka, *itMin);
 
-		for (std::vector<cv::Point>::reverse_iterator rit = seznamTock.rbegin() + 1; rit != seznamTock.rend(); rit++) {
+		for (std::vector<cv::Point>::reverse_iterator rit = seznamTockKopija.rbegin() + 1; rit != seznamTockKopija.rend(); rit++) {
 
 			const int vrednostNova = manhattanRazdalja(tekocaTocka, *rit);
 
@@ -249,17 +343,57 @@ void narisiPovezave_V0(cv::Mat slika, std::vector<cv::Point> seznamTock) {
 				itMin = rit;
 			}
 		}
+		//std::cout << vrednostMin << ':' << tekocaTocka << '|' << *itMin << '\n';
+		resitev.push_back(*itMin);
 
-		urejenSeznamTock.push_back(*itMin);
+		tekocaTocka = *itMin;
 
-		seznamTock.erase(itMin.base() - 1);
+		seznamTockKopija.erase(itMin.base() - 1);
 	}
 
-	for (int i = 1; i < urejenSeznamTock.size(); i++) {
-		cv::line(slika, urejenSeznamTock[i - 1], urejenSeznamTock[i], cv::Scalar(255, 255, 0));
-	}
+	//std::vector<int> urejenSeznamRazdalj(resitev.size());
+	//
+	//for (int i = 1; i < resitev.size(); i++) {
+	//	urejenSeznamRazdalj[i] = manhattanRazdalja(resitev[i - 1], resitev[i]);
+	//}
+	//urejenSeznamRazdalj.front() = manhattanRazdalja(resitev.front(), resitev.back());
+	//
+	//int index = std::max_element(urejenSeznamRazdalj.begin(), urejenSeznamRazdalj.end()) - urejenSeznamRazdalj.begin();
+	//
+	//if (index == 0) {
+	//	int novaNajvecjaRazdalja = manhattanRazdalja(resitev.front(), resitev.back());
+	//	std::cout << "najvecja razdalja: " << novaNajvecjaRazdalja << ':' << resitev.front() << '|' << resitev.back() << '\n';
+	//	if (novaNajvecjaRazdalja > najvecjaRazdalja)
+	//		najvecjaRazdalja = novaNajvecjaRazdalja;
+	//}
+	//else {
+	//	int novaNajvecjaRazdalja = manhattanRazdalja(resitev[index], resitev[index - 1]);
+	//	std::cout << "najvecja razdalja: " << novaNajvecjaRazdalja << ':' << resitev[index] << '|' << resitev[index - 1] << '\n';
+	//	if (novaNajvecjaRazdalja > najvecjaRazdalja)
+	//		najvecjaRazdalja = novaNajvecjaRazdalja;
+	//}
+	//
+	//if (prvic && index != 0) {
+	//	prvic = false;
+	//	resitev = narisiPovezave_V0(slika, seznamTock, resitev[index]);
+	//	resitev = narisiPovezave_V0(slika, seznamTock, resitev[index - 1]);
+	//}
+	//
+	//
+	//std::cout << "Najnajvecja razdalja: " << najvecjaRazdalja << '\n';
 
-	cv::imshow("Slika", slika);
+	return resitev;
+}
+std::vector<int> narediSeznamRazdalj(const std::vector<cv::Point>& seznamTock) {
+	
+	std::vector<int> resitev(seznamTock.size());
+
+	for (int i = 1; i < seznamTock.size(); i++) {
+		resitev[i] = manhattanRazdalja(seznamTock[i - 1], seznamTock[i]);
+	}
+	resitev.front() = manhattanRazdalja(seznamTock.front(), seznamTock.back());
+
+	return resitev;
 }
 
 
