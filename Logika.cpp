@@ -57,6 +57,15 @@ void prepoznavaBarv_V0(cv::Mat slika) {
 
 void prepoznavaZic_V0(cv::Mat slika) {
 
+	std::vector<cv::Point> vertikalneTocke(vertikalnaPrepoznava(slika));
+
+
+}
+
+std::vector<cv::Point> vertikalnaPrepoznava(cv::Mat slika) {
+
+	std::vector<cv::Point> resitev;
+
 	int obmocje = 10;
 
 	int b = 36;  // b /////////////////////////////
@@ -76,9 +85,9 @@ void prepoznavaZic_V0(cv::Mat slika) {
 	//cv::erode(razsirjena, razsirjena, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
 
 	cv::imshow("Slika", razsirjena);
-	cv::waitKey(1000);
+	cv::waitKey(200);
 
-	for (int x = 0; x < razsirjena.cols; x += 10) {
+	for (int x = 0; x < razsirjena.cols; x += 10) { ///////////////////// dat v novo funkcijo
 
 		std::vector<cv::Point> seznamNajdenihVertikalnihTock{};
 
@@ -96,16 +105,34 @@ void prepoznavaZic_V0(cv::Mat slika) {
 			//cv::circle(slika, sredinaTock_V0(seznamNajdenihVertikalnihTock), 3, cv::Scalar(0, 255, 0), -1);
 			//std::cout << "velikost: " << seznamNajdenihVertikalnihTock.size() << '\n';
 			
-			std::vector<cv::Point> seznamSrednjihTock(sredinaTock_V1(seznamNajdenihVertikalnihTock));
+			std::vector<cv::Point> seznamSrednjihTock(sredinaVecihTock_V0(seznamNajdenihVertikalnihTock));
 			for (const cv::Point& tocka : seznamSrednjihTock) {
-				cv::circle(slika, tocka, 3, cv::Scalar(0, 255, 0), -1); //////////////////// vse tocke v en seznam
+				//cv::circle(slika, tocka, 3, cv::Scalar(0, 255, 0), -1);
+				resitev.push_back(tocka);
 			}
 		}
 	}
 
-	cv::imshow("Slika", slika);
-}
+	for (const cv::Point& tocka : resitev)
+		cv::circle(slika, tocka, 3, cv::Scalar(0, 255, 0), -1);
 
+	cv::imshow("Slika", slika);
+	cv::waitKey(200);
+	
+	//horizontalnaPoravnava_V0(razsirjena, resitev);
+	horizontalnaPoravnava_V1(razsirjena, resitev);
+
+	for (const cv::Point& tocka : resitev)
+		cv::circle(slika, tocka, 3, cv::Scalar(255, 0, 0), -1);
+
+	cv::imshow("Slika", slika);
+	cv::waitKey(200);
+
+	narisiPovezave_V0(slika, resitev); ////////////////////
+
+
+	return resitev;
+}
 cv::Point sredinaTock_V0(const std::vector<cv::Point>& seznamTock) {
 	cv::Point resitev(0, 0);
 	for (const cv::Point& tocka : seznamTock) {
@@ -114,8 +141,14 @@ cv::Point sredinaTock_V0(const std::vector<cv::Point>& seznamTock) {
 	resitev /= static_cast<int>(seznamTock.size());
 	return resitev;
 }
-
-std::vector<cv::Point> sredinaTock_V1(const std::vector<cv::Point>& seznamTock) {
+inline cv::Point sredinaTock_V1(const std::vector<cv::Point>::const_iterator& it1, const std::vector<cv::Point>::const_iterator& it2) {
+	return (*it1 + *it2) / 2;
+}
+inline cv::Point sredinaTock_V1(const cv::Point& to1, const cv::Point& to2)
+{
+	return (to1 + to2) / 2;
+}
+std::vector<cv::Point> sredinaVecihTock_V0(const std::vector<cv::Point>& seznamTock) {
 	
 	std::vector<cv::Point> resitev;
 
@@ -127,19 +160,106 @@ std::vector<cv::Point> sredinaTock_V1(const std::vector<cv::Point>& seznamTock) 
 	
 		//std::cout << "razdalja: " << manhattanRazdalja(*tekocaTocka, *it) << '\n';
 		if (manhattanRazdalja(*tekocaTocka, *it) > 1) {
-			resitev.push_back(sredinaTock_V0(std::vector<cv::Point>(zacetnaTocka, it)));
+			//resitev.push_back(sredinaTock_V0(std::vector<cv::Point>(zacetnaTocka, it)));
+			resitev.push_back(sredinaTock_V1(zacetnaTocka, tekocaTocka));
 			zacetnaTocka = it;
 		}
 
 		tekocaTocka = it;
 	}
-	resitev.push_back(sredinaTock_V0(std::vector<cv::Point>(zacetnaTocka, seznamTock.cend())));
+	resitev.push_back(sredinaTock_V1(zacetnaTocka, tekocaTocka));
 
 	return resitev;
 }
-
 inline int manhattanRazdalja(const cv::Point& to1, const cv::Point& to2) {
 	return abs(to1.x - to2.x) + abs(to1.y - to2.y);
+}
+
+void horizontalnaPoravnava_V0(cv::Mat slika, std::vector<cv::Point>& seznamTock) {
+
+	for (cv::Point& tocka : seznamTock) {
+
+		cv::Point levaTocka = tocka;
+
+		while (slika.at<uchar>(levaTocka) > 0) {
+			levaTocka += cv::Point(-1, 0); ///////////////////// mogoc tocka preide izven okvirja slike
+		}
+
+		cv::Point desnaTocka = tocka;
+
+		while (slika.at<uchar>(desnaTocka) > 0) {
+			desnaTocka += cv::Point(1, 0); ///////////////////// mogoc tocka preide izven okvirja slike
+		}
+
+		tocka = sredinaTock_V1(levaTocka, desnaTocka);
+	}
+}
+void horizontalnaPoravnava_V1(cv::Mat slika, std::vector<cv::Point>& seznamTock) {
+
+	for (cv::Point& tocka : seznamTock) {
+
+		cv::Point zgornjaTocka = tocka;
+
+		while (slika.at<uchar>(zgornjaTocka) > 0) {
+			zgornjaTocka += cv::Point(0, -1); ///////////////////// mogoc tocka preide izven okvirja slike
+		}
+
+		cv::Point spodnjaTocka = tocka;
+
+		while (slika.at<uchar>(spodnjaTocka) > 0) {
+			spodnjaTocka += cv::Point(0, 1); ///////////////////// mogoc tocka preide izven okvirja slike
+		}
+
+		cv::Point levaTocka = tocka;
+
+		while (slika.at<uchar>(levaTocka) > 0) {
+			levaTocka += cv::Point(-1, 0); ///////////////////// mogoc tocka preide izven okvirja slike
+		}
+
+		cv::Point desnaTocka = tocka;
+
+		while (slika.at<uchar>(desnaTocka) > 0) {
+			desnaTocka += cv::Point(1, 0); ///////////////////// mogoc tocka preide izven okvirja slike
+		}
+
+		if (manhattanRazdalja(levaTocka, desnaTocka) < manhattanRazdalja(zgornjaTocka, spodnjaTocka))
+			tocka = sredinaTock_V1(levaTocka, desnaTocka);
+	}
+}
+
+void narisiPovezave_V0(cv::Mat slika, std::vector<cv::Point> seznamTock) {
+
+	cv::Point tekocaTocka = seznamTock.back();
+	seznamTock.pop_back();
+
+	std::vector<cv::Point> urejenSeznamTock{tekocaTocka};
+
+	while (!seznamTock.empty()) {
+
+		std::vector<cv::Point>::reverse_iterator itMin = seznamTock.rbegin();
+		int vrednostMin = manhattanRazdalja(tekocaTocka, *itMin);
+
+		for (std::vector<cv::Point>::reverse_iterator rit = seznamTock.rbegin() + 1; rit != seznamTock.rend(); rit++) {
+
+			const int vrednostNova = manhattanRazdalja(tekocaTocka, *rit);
+
+			if (vrednostNova < vrednostMin) {
+
+				vrednostMin = vrednostNova;
+				itMin = rit;
+			}
+		}
+
+		urejenSeznamTock.push_back(*itMin);
+
+		seznamTock.erase(itMin.base() - 1);
+	}
+
+	for (int i = 1; i < urejenSeznamTock.size(); i++) {
+		cv::line(slika, urejenSeznamTock[i - 1], urejenSeznamTock[i], cv::Scalar(255, 255, 0));
+	}
+
+	cv::imshow("Slika", slika);
 }
 
 
