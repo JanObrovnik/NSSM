@@ -16,12 +16,12 @@
 
 
 
-void prepoznavaBarv_V0(cv::Mat slika);
+std::vector<std::pair<cv::Scalar, cv::Scalar>> prepoznavaBarv_V0(cv::Mat slika);
 
 
-void prepoznavaZic_V0(cv::Mat slika);
+void prepoznavaZic_V0(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve);
 
-void izdelavaMaske(cv::Mat slika, cv::Mat& maska);
+void izdelavaMaske(cv::Mat slika, cv::Mat& maska, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve);
 
 std::vector<cv::Point> vertikalnaPrepoznava(cv::Mat maska, int korak);
 void horizontalnaPoravnava_V0(cv::Mat maska, std::vector<cv::Point>& seznamTock); //- stara verzija

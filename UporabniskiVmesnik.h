@@ -36,6 +36,7 @@ private:
 	std::vector<std::string> seznamPoti;
 	std::vector<std::string> seznamKontrolnihIkon;
 	int indexTab;
+	std::vector<std::pair<cv::Scalar, cv::Scalar>> barve;
 
 public:
 	UporabniskiVmesnik(std::string& vhod, std::string& izhod);

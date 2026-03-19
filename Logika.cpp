@@ -1,32 +1,19 @@
 #include "Logika.h"
 
 
-void prepoznavaBarv_V0(cv::Mat slika) {
+std::vector<std::pair<cv::Scalar, cv::Scalar>> prepoznavaBarv_V0(cv::Mat slika) {
+
+	std::vector<std::pair<cv::Scalar, cv::Scalar>> resitev;
+
 
 	cv::Mat slikaVmesna, slikaCanny, slikaHSV, maska;
 
 	cv::GaussianBlur(slika, slikaVmesna, cv::Size(3, 3), 0);
 
-	cv::cvtColor(slikaVmesna, slikaHSV, cv::COLOR_BGR2HSV);
+	cv::cvtColor(slikaVmesna, slikaHSV, cv::COLOR_BGR2HSV); //////////////// brisi ko das v BGR
 
 
-	cv::Canny(slikaVmesna, slikaCanny, 100, 200);
-	cv::dilate(slikaCanny, slikaCanny, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
-	cv::erode(slikaCanny, slikaCanny, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
-
-	///
-	//cv::imshow("canny", slikaCanny);
-	//cv::imshow("HSV", slikaHSV);
-	//cv::waitKey(0);
-	//cv::destroyAllWindows();
-	///
-
-	//cv::imshow("Slika", slika);
-	//cv::waitKey(0);
-
-
-	//const int locljivost = 18;
-	const int sirinaObmocje = 30;
+	const int sirinaObmocje = 6;
 	const int korak = 6;
 
 	int zacetek, konec;
@@ -36,9 +23,7 @@ void prepoznavaBarv_V0(cv::Mat slika) {
 		zacetek = loc - sirinaObmocje;
 		konec = loc;
 
-		/////////////////////////////////
-
-		int hmin = zacetek, smin = 40, vmin = 40;
+		int hmin = zacetek, smin = 40, vmin = 40; /////////////////// pretvori v BGR
 		int hmax = konec, smax = 255, vmax = 255;
 
 		cv::Scalar spodnja(hmin, smin, vmin);
@@ -46,19 +31,38 @@ void prepoznavaBarv_V0(cv::Mat slika) {
 
 		cv::inRange(slikaHSV, spodnja, zgornja, maska);
 
-		cv::imshow("Slika", maska);
-		cv::waitKey(100);
+		if (cv::countNonZero(maska) != 0) {
 
+			cv::imshow("Slika", maska);
 
-		//std::cout << "ob: " << zacetek << " - " << konec << '\n';
+			int k;
+
+			NEVELJAVEN_ZNAK:
+
+			k = cv::waitKey(0);
+			//std::cout << k << '\n';
+
+			if (k == 13) resitev.push_back({ spodnja,zgornja }); // enter
+			else if (k == 8); // backspace
+			else if (k == 113) break; // q
+			else goto NEVELJAVEN_ZNAK;
+		}
 	}
+
+	std::cout << "resitev:" << resitev.size() << '\n';
+
+	cv::imshow("Slika", slika);
+	cv::waitKey(200);
+
+
+	return resitev;
 }
 
 
-void prepoznavaZic_V0(cv::Mat slika) {
+void prepoznavaZic_V0(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve) {
 
 	cv::Mat maska;
-	izdelavaMaske(slika, maska);
+	izdelavaMaske(slika, maska, barve);
 
 	int korak = 10;
 	std::vector<cv::Point> vertikalneTocke(vertikalnaPrepoznava(maska, korak));
@@ -79,22 +83,27 @@ void prepoznavaZic_V0(cv::Mat slika) {
 	//narisiPovezave_V1();
 }
 
-void izdelavaMaske(cv::Mat slika, cv::Mat& maska) {
+void izdelavaMaske(cv::Mat slika, cv::Mat& maska, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve) {
 
-	int obmocje = 10;
-
-	int b = 36;  // b /////////////////////////////
-	int g = 28; // g
-	int r = 237; // r
-
-	cv::Scalar spodnjaMeja(b - obmocje, g - obmocje, r - obmocje);
-	cv::Scalar zgornjaMeja(b + obmocje, g + obmocje, r + obmocje);
+	const cv::Scalar& spodnjaMeja = barve.front().first; /////////////////// deluje samo za prvo
+	const cv::Scalar& zgornjaMeja = barve.front().second;
 
 	cv::Mat gauss;
+
+	//////////////
+	//////////////////// sam za test, pol bo BGR ///////////// brisi
+	cv::GaussianBlur(slika, gauss, cv::Size(3, 3), 0);		   ///////////// brisi
+	cv::cvtColor(gauss, gauss, cv::COLOR_BGR2HSV);			   ///////////// brisi
+	////////////////
 	
-	cv::GaussianBlur(slika, gauss, cv::Size(3, 3), 0);
+	//cv::GaussianBlur(slika, gauss, cv::Size(3, 3), 0); ///////////////// dodaj nazaj
 	cv::inRange(gauss, spodnjaMeja, zgornjaMeja, maska);
+	//cv::imshow("Slika", maska);
+	//cv::waitKey(0);
+	
 	cv::dilate(maska, maska, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+	//cv::imshow("Slika", maska);
+	//cv::waitKey(0);
 }
 
 std::vector<cv::Point> vertikalnaPrepoznava(cv::Mat maska, int korak) {

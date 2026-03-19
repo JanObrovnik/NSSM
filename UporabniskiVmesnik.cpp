@@ -106,11 +106,13 @@ void UporabniskiVmesnik::pritisnjenGumb(const GUMB& gumb) {
 		break;
 	
 	case BARVA:
-		prepoznavaBarv_V0(slika);
+		barve.clear();
+		barve = prepoznavaBarv_V0(slika);
 		break;
 
 	case ZICA:
-		prepoznavaZic_V0(slika);
+		if (barve.empty()) break;
+		prepoznavaZic_V0(slika, barve);
 		break;
 
 	case BERI:
