@@ -57,11 +57,12 @@ void prepoznavaBarv_V0(cv::Mat slika) {
 
 void prepoznavaZic_V0(cv::Mat slika) {
 
-	//////////////////////naredi masko 4
+	cv::Mat maska;
+	izdelavaMaske(slika, maska);
 
 	int korak = 10;
-	std::vector<cv::Point> vertikalneTocke(vertikalnaPrepoznava(slika, korak));
-	std::vector<cv::Point> horizontalneTocke(horizontalnaPrepoznava(slika, korak));
+	std::vector<cv::Point> vertikalneTocke(vertikalnaPrepoznava(maska, korak));
+	std::vector<cv::Point> horizontalneTocke(horizontalnaPrepoznava(maska, korak));
 
 	///////////////////////zdruzitev tock 3
 	std::vector<cv::Point> seznamTock = zdruzitevSeznamovTock(vertikalneTocke, horizontalneTocke);
@@ -78,129 +79,7 @@ void prepoznavaZic_V0(cv::Mat slika) {
 	//narisiPovezave_V1();
 }
 
-std::vector<cv::Point> vertikalnaPrepoznava(cv::Mat slika, int korak) {
-
-	std::vector<cv::Point> resitev;
-
-	int obmocje = 10;
-
-	int b = 36;  // b /////////////////////////////
-	int g = 28 ; // g
-	int r = 237; // r
-
-	cv::Scalar spodnjaMeja(b - obmocje, g - obmocje, r - obmocje);
-	cv::Scalar zgornjaMeja(b + obmocje, g + obmocje, r + obmocje);
-	
-	cv::Mat gauss, maska, razsirjena;
-
-	cv::GaussianBlur(slika, gauss, cv::Size(3, 3), 0);
-
-	cv::inRange(gauss, spodnjaMeja, zgornjaMeja, maska);
-
-	cv::dilate(maska, razsirjena, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
-	//cv::erode(razsirjena, razsirjena, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
-
-	//cv::imshow("Slika", razsirjena);
-	//cv::waitKey(200);
-
-	for (int x = 0; x < razsirjena.cols; x += korak) { ///////////////////// dat v novo funkcijo
-
-		std::vector<cv::Point> seznamNajdenihVertikalnihTock{};
-
-		for (int y = 0; y < razsirjena.rows; y++) {
-
-			if (razsirjena.at<uchar>(y, x) > 0) {
-				//std::cout << "pix (y = " << i << "): " << (int)razsirjena.at<uchar>(i, j) << '\n';
-				//std::cout << "Tocka (y,x) : (" << y << ',' << x << ")\n";
-
-				seznamNajdenihVertikalnihTock.push_back(cv::Point(x, y));
-				//cv::circle(slika, cv::Point(x, y), 3, cv::Scalar(0, 255, 0), -1);
-			}
-		}
-		if (seznamNajdenihVertikalnihTock.size() > 0) {
-			//cv::circle(slika, sredinaTock_V0(seznamNajdenihVertikalnihTock), 3, cv::Scalar(0, 255, 0), -1);
-			//std::cout << "velikost: " << seznamNajdenihVertikalnihTock.size() << '\n';
-			
-			std::vector<cv::Point> seznamSrednjihTock(sredinaVecihTock_V0(seznamNajdenihVertikalnihTock));
-			for (const cv::Point& tocka : seznamSrednjihTock) {
-				//cv::circle(slika, tocka, 3, cv::Scalar(0, 255, 0), -1);
-				resitev.push_back(tocka);
-			}
-		}
-	}
-
-	//for (const cv::Point& tocka : resitev)
-	//	cv::circle(slika, tocka, 3, cv::Scalar(0, 255, 0), -1);
-	//
-	//cv::imshow("Slika", slika);
-	//cv::waitKey(200);
-	
-	//horizontalnaPoravnava_V0(razsirjena, resitev);
-	horizontalnaPoravnava_V1(razsirjena, resitev);
-
-	//for (const cv::Point& tocka : resitev)
-	//	cv::circle(slika, tocka, 3, cv::Scalar(255, 0, 0), -1);
-	//
-	//cv::imshow("Slika", slika);
-	//cv::waitKey(200);
-
-	return resitev;
-}
-void horizontalnaPoravnava_V0(cv::Mat slika, std::vector<cv::Point>& seznamTock) {
-
-	for (cv::Point& tocka : seznamTock) {
-
-		cv::Point levaTocka = tocka;
-
-		while (slika.at<uchar>(levaTocka) > 0) {
-			levaTocka += cv::Point(-1, 0); ///////////////////// mogoc tocka preide izven okvirja slike
-		}
-
-		cv::Point desnaTocka = tocka;
-
-		while (slika.at<uchar>(desnaTocka) > 0) {
-			desnaTocka += cv::Point(1, 0); ///////////////////// mogoc tocka preide izven okvirja slike
-		}
-
-		tocka = sredinaTock_V1(levaTocka, desnaTocka);
-	}
-}
-void horizontalnaPoravnava_V1(cv::Mat slika, std::vector<cv::Point>& seznamTock) {
-
-	for (cv::Point& tocka : seznamTock) {
-
-		cv::Point zgornjaTocka = tocka;
-
-		while (slika.at<uchar>(zgornjaTocka) > 0) {
-			zgornjaTocka += cv::Point(0, -1); ///////////////////// mogoc tocka preide izven okvirja slike
-		}
-
-		cv::Point spodnjaTocka = tocka;
-
-		while (slika.at<uchar>(spodnjaTocka) > 0) {
-			spodnjaTocka += cv::Point(0, 1); ///////////////////// mogoc tocka preide izven okvirja slike
-		}
-
-		cv::Point levaTocka = tocka;
-
-		while (slika.at<uchar>(levaTocka) > 0) {
-			levaTocka += cv::Point(-1, 0); ///////////////////// mogoc tocka preide izven okvirja slike
-		}
-
-		cv::Point desnaTocka = tocka;
-
-		while (slika.at<uchar>(desnaTocka) > 0) {
-			desnaTocka += cv::Point(1, 0); ///////////////////// mogoc tocka preide izven okvirja slike
-		}
-
-		if (manhattanRazdalja(levaTocka, desnaTocka) < manhattanRazdalja(zgornjaTocka, spodnjaTocka))
-			tocka = sredinaTock_V1(levaTocka, desnaTocka);
-	}
-}
-
-std::vector<cv::Point> horizontalnaPrepoznava(cv::Mat slika, int korak) {
-
-	std::vector<cv::Point> resitev;
+void izdelavaMaske(cv::Mat slika, cv::Mat& maska) {
 
 	int obmocje = 10;
 
@@ -211,88 +90,111 @@ std::vector<cv::Point> horizontalnaPrepoznava(cv::Mat slika, int korak) {
 	cv::Scalar spodnjaMeja(b - obmocje, g - obmocje, r - obmocje);
 	cv::Scalar zgornjaMeja(b + obmocje, g + obmocje, r + obmocje);
 
-	cv::Mat gauss, maska, razsirjena;
-
+	cv::Mat gauss;
+	
 	cv::GaussianBlur(slika, gauss, cv::Size(3, 3), 0);
-
 	cv::inRange(gauss, spodnjaMeja, zgornjaMeja, maska);
+	cv::dilate(maska, maska, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+}
 
-	cv::dilate(maska, razsirjena, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
-	//cv::erode(razsirjena, razsirjena, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+std::vector<cv::Point> vertikalnaPrepoznava(cv::Mat maska, int korak) {
 
-	//cv::imshow("Slika", razsirjena);
-	//cv::waitKey(200);
+	std::vector<cv::Point> resitev;
 
-	for (int y = 0; y < razsirjena.rows; y += korak) {
+	for (int x = 0; x < maska.cols; x += korak) {
 
 		std::vector<cv::Point> seznamNajdenihVertikalnihTock{};
 
-		for (int x = 0; x < razsirjena.cols; x++) {
+		for (int y = 0; y < maska.rows; y++) {
 
-			if (razsirjena.at<uchar>(y, x) > 0) {
-				//std::cout << "pix (y = " << i << "): " << (int)razsirjena.at<uchar>(i, j) << '\n';
-				//std::cout << "Tocka (y,x) : (" << y << ',' << x << ")\n";
+			if (maska.at<uchar>(y, x) > 0) {
 
 				seznamNajdenihVertikalnihTock.push_back(cv::Point(x, y));
-				//cv::circle(slika, cv::Point(x, y), 3, cv::Scalar(0, 255, 0), -1);
 			}
 		}
-		if (seznamNajdenihVertikalnihTock.size() > 0) {
-			//cv::circle(slika, sredinaTock_V0(seznamNajdenihVertikalnihTock), 3, cv::Scalar(0, 255, 0), -1);
-			//std::cout << "velikost: " << seznamNajdenihVertikalnihTock.size() << '\n';
 
+		if (seznamNajdenihVertikalnihTock.size() > 0) {
+			
 			std::vector<cv::Point> seznamSrednjihTock(sredinaVecihTock_V0(seznamNajdenihVertikalnihTock));
+
 			for (const cv::Point& tocka : seznamSrednjihTock) {
-				//cv::circle(slika, tocka, 3, cv::Scalar(0, 255, 0), -1);
 				resitev.push_back(tocka);
 			}
 		}
 	}
 
-	//for (const cv::Point& tocka : resitev)
-	//	cv::circle(slika, tocka, 3, cv::Scalar(0, 255, 0), -1);
-	//
-	//cv::imshow("Slika", slika);
-	//cv::waitKey(200);
-
-	//horizontalnaPoravnava_V0(razsirjena, resitev);
-	vertikalnaPoravnava_V1(razsirjena, resitev);
-
-	//for (const cv::Point& tocka : resitev)
-	//	cv::circle(slika, tocka, 3, cv::Scalar(255, 0, 0), -1);
-	//
-	//cv::imshow("Slika", slika);
-	//cv::waitKey(200);
+	horizontalnaPoravnava_V1(maska, resitev);
 
 	return resitev;
 }
-void vertikalnaPoravnava_V1(cv::Mat slika, std::vector<cv::Point>& seznamTock) {
+void horizontalnaPoravnava_V0(cv::Mat maska, std::vector<cv::Point>& seznamTock) {
 
 	for (cv::Point& tocka : seznamTock) {
 
-		cv::Point zgornjaTocka = tocka;
-
-		while (slika.at<uchar>(zgornjaTocka) > 0) {
-			zgornjaTocka += cv::Point(0, -1); ///////////////////// mogoc tocka preide izven okvirja slike
-		}
-
-		cv::Point spodnjaTocka = tocka;
-
-		while (slika.at<uchar>(spodnjaTocka) > 0) {
-			spodnjaTocka += cv::Point(0, 1); ///////////////////// mogoc tocka preide izven okvirja slike
-		}
-
 		cv::Point levaTocka = tocka;
 
-		while (slika.at<uchar>(levaTocka) > 0) {
+		while (maska.at<uchar>(levaTocka) > 0) {
 			levaTocka += cv::Point(-1, 0); ///////////////////// mogoc tocka preide izven okvirja slike
 		}
 
 		cv::Point desnaTocka = tocka;
 
-		while (slika.at<uchar>(desnaTocka) > 0) {
+		while (maska.at<uchar>(desnaTocka) > 0) {
 			desnaTocka += cv::Point(1, 0); ///////////////////// mogoc tocka preide izven okvirja slike
 		}
+
+		tocka = sredinaTock_V1(levaTocka, desnaTocka);
+	}
+}
+void horizontalnaPoravnava_V1(cv::Mat maska, std::vector<cv::Point>& seznamTock) {
+
+	for (cv::Point& tocka : seznamTock) {
+
+		cv::Point zgornjaTocka, spodnjaTocka, levaTocka, desnaTocka;
+
+		skrajneTocke(maska, tocka, desnaTocka, zgornjaTocka, levaTocka, spodnjaTocka);
+
+		if (manhattanRazdalja(levaTocka, desnaTocka) < manhattanRazdalja(zgornjaTocka, spodnjaTocka))
+			tocka = sredinaTock_V1(levaTocka, desnaTocka);
+	}
+}
+
+std::vector<cv::Point> horizontalnaPrepoznava(cv::Mat maska, int korak) {
+
+	std::vector<cv::Point> resitev;
+
+	for (int y = 0; y < maska.rows; y += korak) {
+
+		std::vector<cv::Point> seznamNajdenihVertikalnihTock{};
+
+		for (int x = 0; x < maska.cols; x++) {
+
+			if (maska.at<uchar>(y, x) > 0) {
+
+				seznamNajdenihVertikalnihTock.push_back(cv::Point(x, y));
+			}
+		}
+
+		if (seznamNajdenihVertikalnihTock.size() > 0) {
+
+			std::vector<cv::Point> seznamSrednjihTock(sredinaVecihTock_V0(seznamNajdenihVertikalnihTock));
+			for (const cv::Point& tocka : seznamSrednjihTock) {
+				resitev.push_back(tocka);
+			}
+		}
+	}
+
+	vertikalnaPoravnava_V1(maska, resitev);
+
+	return resitev;
+}
+void vertikalnaPoravnava_V1(cv::Mat maska, std::vector<cv::Point>& seznamTock) {
+
+	for (cv::Point& tocka : seznamTock) {
+
+		cv::Point zgornjaTocka, spodnjaTocka, levaTocka, desnaTocka;
+
+		skrajneTocke(maska, tocka, desnaTocka, zgornjaTocka, levaTocka, spodnjaTocka);
 
 		if (manhattanRazdalja(zgornjaTocka, spodnjaTocka) < manhattanRazdalja(levaTocka, desnaTocka))
 			tocka = sredinaTock_V1(zgornjaTocka, spodnjaTocka);
@@ -330,12 +232,10 @@ std::vector<cv::Point> sredinaVecihTock_V0(const std::vector<cv::Point>& seznamT
 	std::vector<cv::Point>::const_iterator zacetnaTocka = seznamTock.cbegin();
 	std::vector<cv::Point>::const_iterator tekocaTocka = zacetnaTocka;
 	
-
 	for (std::vector<cv::Point>::const_iterator it = zacetnaTocka + 1; it != seznamTock.cend(); it++) {
 	
-		//std::cout << "razdalja: " << manhattanRazdalja(*tekocaTocka, *it) << '\n';
 		if (manhattanRazdalja(*tekocaTocka, *it) > 1) {
-			//resitev.push_back(sredinaTock_V0(std::vector<cv::Point>(zacetnaTocka, it)));
+
 			resitev.push_back(sredinaTock_V1(zacetnaTocka, tekocaTocka));
 			zacetnaTocka = it;
 		}
@@ -348,6 +248,28 @@ std::vector<cv::Point> sredinaVecihTock_V0(const std::vector<cv::Point>& seznamT
 }
 inline int manhattanRazdalja(const cv::Point& to1, const cv::Point& to2) {
 	return abs(to1.x - to2.x) + abs(to1.y - to2.y);
+}
+void skrajneTocke(cv::Mat maska, const cv::Point& tocka, cv::Point& desnaTocka, cv::Point& zgornjaTocka, cv::Point& levaTocka, cv::Point& spodnjaTocka) {
+
+	zgornjaTocka = tocka;
+	while (maska.at<uchar>(zgornjaTocka) > 0) {
+		zgornjaTocka += cv::Point(0, -1); ///////////////////// mogoc tocka preide izven okvirja slike
+	}
+
+	spodnjaTocka = tocka;
+	while (maska.at<uchar>(spodnjaTocka) > 0) {
+		spodnjaTocka += cv::Point(0, 1); ///////////////////// mogoc tocka preide izven okvirja slike
+	}
+
+	levaTocka = tocka;
+	while (maska.at<uchar>(levaTocka) > 0) {
+		levaTocka += cv::Point(-1, 0); ///////////////////// mogoc tocka preide izven okvirja slike
+	}
+
+	desnaTocka = tocka;
+	while (maska.at<uchar>(desnaTocka) > 0) {
+		desnaTocka += cv::Point(1, 0); ///////////////////// mogoc tocka preide izven okvirja slike
+	}
 }
 
 std::vector<cv::Point> narisiPovezave_V0(cv::Mat slika, const std::vector<cv::Point>& seznamTock, const cv::Point& zacetnaTocka) {
