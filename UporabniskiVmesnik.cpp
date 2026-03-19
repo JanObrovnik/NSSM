@@ -98,16 +98,18 @@ void UporabniskiVmesnik::pritisnjenGumb(const GUMB& gumb) {
 		break;
 	
 	case LEVI:
+		barve.clear(); ////////////////// mogoc brezveze
 		naloziSliko(LEVI);
 		break;
 	
 	case DESNI:
+		barve.clear();
 		naloziSliko(DESNI);
 		break;
 	
 	case BARVA:
 		barve.clear();
-		barve = prepoznavaBarv_V0(slika);
+		barve = prepoznavaBarv_V2(slika);
 		break;
 
 	case ZICA:

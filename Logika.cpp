@@ -57,6 +57,111 @@ std::vector<std::pair<cv::Scalar, cv::Scalar>> prepoznavaBarv_V0(cv::Mat slika) 
 
 	return resitev;
 }
+std::vector<std::pair<cv::Scalar, cv::Scalar>> prepoznavaBarv_V1(cv::Mat slika) {
+
+	std::vector<std::pair<cv::Scalar, cv::Scalar>> resitev;
+
+
+	cv::Mat slikaVmesna, maska;
+
+	cv::GaussianBlur(slika, slikaVmesna, cv::Size(3, 3), 0);
+
+
+	int sirinaOkna = 32;
+
+	bool izhod = false;
+	for (int b = 0; b < 256; b += sirinaOkna) {
+		for (int g = 0; g < 256; g += sirinaOkna) {
+			for (int r = 0; r < 256; r += sirinaOkna) {
+
+				cv::Scalar spodnja(b, g, r);
+				cv::Scalar zgornja(b + sirinaOkna, g + sirinaOkna, r + sirinaOkna);
+
+				cv::inRange(slikaVmesna, spodnja, zgornja, maska);
+
+				if (cv::countNonZero(maska) > 50 && cv::countNonZero(maska) < maska.cols * maska.rows / 2) {
+
+					cv::imshow("Slika", maska);
+
+					int k;
+
+					NEVELJAVEN_ZNAK:
+
+					k = cv::waitKey(0);
+					//std::cout << k << '\n';
+
+					if (k == 13) resitev.push_back({ spodnja,zgornja }); // enter
+					else if (k == 8); // backspace
+					else if (k == 113) izhod = true; // q
+					else goto NEVELJAVEN_ZNAK;
+				}
+
+				if (izhod) break;
+			}
+			if (izhod) break;
+		}
+		if (izhod) break;
+	}
+
+	//std::cout << "resitev:" << resitev.size() << '\n';
+
+	cv::imshow("Slika", slika);
+
+	return resitev;
+}
+std::vector<std::pair<cv::Scalar, cv::Scalar>> prepoznavaBarv_V2(cv::Mat slika) {
+
+	std::vector<std::pair<cv::Scalar, cv::Scalar>> resitev;
+
+
+	std::vector<cv::Scalar> dataBaza{
+		cv::Scalar(32,29,234),
+		cv::Scalar(199,72,65),
+		cv::Scalar(5,240,252),
+		cv::Scalar(22,0,136),
+		cv::Scalar(73,177,35),
+		cv::Scalar(162,72,163),
+	};
+
+	cv::Mat slikaVmesna, maska;
+
+	cv::GaussianBlur(slika, slikaVmesna, cv::Size(3, 3), 0);
+
+
+	int polmerOknaBarve = 10;
+
+	for (const cv::Scalar& meja : dataBaza) {
+
+		cv::Scalar spodnja(meja[0] - polmerOknaBarve, meja[1] - polmerOknaBarve, meja[2] - polmerOknaBarve);
+		cv::Scalar zgornja(meja[0] + polmerOknaBarve, meja[1] + polmerOknaBarve, meja[2] + polmerOknaBarve);
+
+		cv::inRange(slikaVmesna, spodnja, zgornja, maska);
+
+		if (cv::countNonZero(maska) != 0) {
+
+			cv::imshow("Slika", maska);
+
+			int k;
+
+		NEVELJAVEN_ZNAK:
+
+			k = cv::waitKey(0);
+			//std::cout << k << '\n';
+
+			if (k == 13) resitev.push_back({ spodnja,zgornja }); // enter
+			else if (k == 8); // backspace
+			else if (k == 113) break; // q
+			else goto NEVELJAVEN_ZNAK;
+		}
+
+	}
+
+	//std::cout << "resitev:" << resitev.size() << '\n';
+
+	cv::imshow("Slika", slika);
+
+	return resitev;
+}
 
 
 void prepoznavaZic_V0(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve) {
@@ -92,11 +197,11 @@ void izdelavaMaske(cv::Mat slika, cv::Mat& maska, const std::vector<std::pair<cv
 
 	//////////////
 	//////////////////// sam za test, pol bo BGR ///////////// brisi
-	cv::GaussianBlur(slika, gauss, cv::Size(3, 3), 0);		   ///////////// brisi
-	cv::cvtColor(gauss, gauss, cv::COLOR_BGR2HSV);			   ///////////// brisi
+	//cv::GaussianBlur(slika, gauss, cv::Size(3, 3), 0);		   ///////////// brisi
+	//cv::cvtColor(gauss, gauss, cv::COLOR_BGR2HSV);			   ///////////// brisi
 	////////////////
 	
-	//cv::GaussianBlur(slika, gauss, cv::Size(3, 3), 0); ///////////////// dodaj nazaj
+	cv::GaussianBlur(slika, gauss, cv::Size(3, 3), 0); ///////////////// dodaj nazaj
 	cv::inRange(gauss, spodnjaMeja, zgornjaMeja, maska);
 	//cv::imshow("Slika", maska);
 	//cv::waitKey(0);

@@ -17,6 +17,8 @@
 
 
 std::vector<std::pair<cv::Scalar, cv::Scalar>> prepoznavaBarv_V0(cv::Mat slika);
+std::vector<std::pair<cv::Scalar, cv::Scalar>> prepoznavaBarv_V1(cv::Mat slika);
+std::vector<std::pair<cv::Scalar, cv::Scalar>> prepoznavaBarv_V2(cv::Mat slika);
 
 
 void prepoznavaZic_V0(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve);
