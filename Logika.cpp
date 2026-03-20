@@ -358,25 +358,30 @@ inline int manhattanRazdalja(const cv::Point& to1, const cv::Point& to2) {
 	return abs(to1.x - to2.x) + abs(to1.y - to2.y);
 }
 void skrajneTocke(cv::Mat maska, const cv::Point& tocka, cv::Point& desnaTocka, cv::Point& zgornjaTocka, cv::Point& levaTocka, cv::Point& spodnjaTocka) {
+	
+	const int& minX = -1;
+	const int& minY = -1;
+	const int& maxX = maska.cols;
+	const int& maxY = maska.rows;
 
 	zgornjaTocka = tocka;
-	while (maska.at<uchar>(zgornjaTocka) > 0) {
-		zgornjaTocka += cv::Point(0, -1); ///////////////////// mogoc tocka preide izven okvirja slike
+	while (zgornjaTocka.y > minY && maska.at<uchar>(zgornjaTocka) > 0) {
+		zgornjaTocka += cv::Point(0, -1);
 	}
 
 	spodnjaTocka = tocka;
-	while (maska.at<uchar>(spodnjaTocka) > 0) {
-		spodnjaTocka += cv::Point(0, 1); ///////////////////// mogoc tocka preide izven okvirja slike
+	while (spodnjaTocka.y < maxY && maska.at<uchar>(spodnjaTocka) > 0) {
+		spodnjaTocka += cv::Point(0, 1);
 	}
 
 	levaTocka = tocka;
-	while (maska.at<uchar>(levaTocka) > 0) {
-		levaTocka += cv::Point(-1, 0); ///////////////////// mogoc tocka preide izven okvirja slike
+	while (levaTocka.x > minX && maska.at<uchar>(levaTocka) > 0) {
+		levaTocka += cv::Point(-1, 0);
 	}
 
 	desnaTocka = tocka;
-	while (maska.at<uchar>(desnaTocka) > 0) {
-		desnaTocka += cv::Point(1, 0); ///////////////////// mogoc tocka preide izven okvirja slike
+	while (desnaTocka.x < maxX && maska.at<uchar>(desnaTocka) > 0) {
+		desnaTocka += cv::Point(1, 0);
 	}
 }
 
