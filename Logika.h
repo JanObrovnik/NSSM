@@ -24,6 +24,7 @@ std::vector<std::pair<cv::Scalar, cv::Scalar>> prepoznavaBarv_V2(cv::Mat slika);
 
 void prepoznavaZic_V0(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve);
 void prepoznavaZic_V1(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve);
+void prepoznavaZic_V2(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve);
 
 void izdelavaMaske_V0(cv::Mat slika, cv::Mat& maska, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve);
 void izdelavaMaske_V1(cv::Mat slika, cv::Mat& maska, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve);
@@ -54,6 +55,8 @@ std::vector<cv::Point> narisiPovezave_V1(cv::Mat slika, const std::vector<cv::Po
 std::vector<cv::Point> narisiPovezave_V2(cv::Mat slika, const std::vector<cv::Point>& seznamTock, const cv::Point& zacetnaTocka);
 std::vector<cv::Point> narisiPovezave_V3(cv::Mat maska, const std::vector<cv::Point>& seznamTock);
 std::vector<int> narediSeznamRazdalj(const std::vector<cv::Point>& seznamTock);
+
+std::vector<cv::Point> narisiPovezaveKoncev_V0(const std::vector<cv::Point>& seznamTock);
 
 
 void prepoznajTekst_V0(cv::Mat slika, const int razsiritev = 10);
