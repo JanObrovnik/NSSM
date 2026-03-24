@@ -35,7 +35,7 @@ void horizontalnaPoravnava_V1(cv::Mat maska, std::vector<cv::Point>& seznamTock)
 std::vector<cv::Point> horizontalnaPrepoznava(cv::Mat maska, int korak);
 void vertikalnaPoravnava_V1(cv::Mat maska, std::vector<cv::Point>& seznamTock);
 
-std::vector<cv::Point> prepoznavaVsehTock(cv::Mat maska);
+std::vector<cv::Point> prepoznavaVsehTock(cv::Mat& maska);
 
 std::vector<cv::Point> zdruzitevSeznamovTock_V0(const std::vector<cv::Point>& sez1, const std::vector<cv::Point>& sez2, const int& filter);
 std::vector<cv::Point> zdruzitevSeznamovTock_V1(const std::vector<cv::Point>& sez1, const std::vector<cv::Point>& sez2, const int& filter);

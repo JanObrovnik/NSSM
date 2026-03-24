@@ -190,10 +190,9 @@ void prepoznavaZic_V1(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv:
 	izdelavaMaske_V1(slika, maska, barve);
 	
 	std::vector<cv::Point> seznamTock = prepoznavaVsehTock(maska);
-	//std::cout << seznamTock.size() << '\n';
 
 	std::vector<cv::Point> robneTocke = narisiPovezave_V3(maska, seznamTock);
-	std::cout << robneTocke.size() << '\n';
+	std::cout << robneTocke.size() << '\n'; //////////////////// povezi prekinitve
 
 	cv::line(slika, robneTocke.front(), robneTocke.back(), cv::Scalar(0, 255, 0));
 
@@ -233,7 +232,7 @@ void izdelavaMaske_V1(cv::Mat slika, cv::Mat& maska, const std::vector<std::pair
 	cv::GaussianBlur(slika, gauss, cv::Size(3, 3), 0); ///////////////// dodaj nazaj
 	cv::inRange(gauss, spodnjaMeja, zgornjaMeja, maska);
 
-	cv::dilate(maska, maska, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+	cv::dilate(maska, maska, cv::getStructuringElement(cv::MORPH_CROSS, cv::Size(3, 3)));
 
 	cv::ximgproc::thinning(maska, maska, cv::ximgproc::ThinningTypes::THINNING_ZHANGSUEN);
 	//cv::ximgproc::thinning(maska, maska2, cv::ximgproc::ThinningTypes::THINNING_GUOHALL);
@@ -343,7 +342,7 @@ void vertikalnaPoravnava_V1(cv::Mat maska, std::vector<cv::Point>& seznamTock) {
 	}
 }
 
-std::vector<cv::Point> prepoznavaVsehTock(cv::Mat maska) {
+std::vector<cv::Point> prepoznavaVsehTock(cv::Mat& maska) {
 
 	std::vector<cv::Point> resitev;
 
@@ -352,7 +351,12 @@ std::vector<cv::Point> prepoznavaVsehTock(cv::Mat maska) {
 	auto it = std::remove_if(resitev.begin(), resitev.end(), [&](const cv::Point& tocka) {
 		const int& x = tocka.x;
 		const int& y = tocka.y;
-		return x == 0 || x == maska.cols - 1 || y == 0 || y == maska.rows - 1;
+
+		if (x == 0 || x == (maska.cols - 1) || y == 0 || y == (maska.rows - 1)) {
+			maska.at<uchar>(tocka) = 0;
+			return true;
+		}
+		else return false;
 		});
 
 	resitev.erase(it, resitev.end());
@@ -670,7 +674,7 @@ std::vector<cv::Point> narisiPovezave_V3(cv::Mat maska, const std::vector<cv::Po
 		//if (x == 0 || x == maska.cols - 1 || y == 0 || y == maska.rows - 1)
 		//	continue;
 
-		int stSosed = 0;
+		int stSosed = -1;
 
 		for (int xx : { -1,0,1 }) {
 			for (int yy : { -1,0,1 }) {
@@ -678,7 +682,7 @@ std::vector<cv::Point> narisiPovezave_V3(cv::Mat maska, const std::vector<cv::Po
 			}
 		}
 
-		if (stSosed == 2)
+		if (stSosed == 1)
 			resitev.push_back(tocka);
 	}
 
