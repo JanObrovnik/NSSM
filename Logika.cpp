@@ -162,25 +162,46 @@ std::vector<std::pair<cv::Scalar, cv::Scalar>> prepoznavaBarv_V2(cv::Mat slika) 
 void prepoznavaZic_V0(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve) {
 
 	cv::Mat maska;
-	izdelavaMaske(slika, maska, barve);
+	izdelavaMaske_V0(slika, maska, barve);
 
 	int korak = 10;
 	std::vector<cv::Point> vertikalneTocke(vertikalnaPrepoznava(maska, korak));
 	std::vector<cv::Point> horizontalneTocke(horizontalnaPrepoznava(maska, korak));
 
 	std::vector<cv::Point> seznamTock = zdruzitevSeznamovTock_V0(vertikalneTocke, horizontalneTocke, korak);
+	//std::vector<cv::Point> seznamTock = zdruzitevSeznamovTock_V1(vertikalneTocke, horizontalneTocke, korak);
+	//std::vector<cv::Point> seznamTock = zdruzitevSeznamovTock_V2(vertikalneTocke, horizontalneTocke, korak);
 
 	for (const cv::Point& tocka : seznamTock)
 		cv::circle(slika, tocka, 3, cv::Scalar(0, 255, 0), -1);
 	cv::imshow("Slika", slika);
-	cv::waitKey(200);
+	cv::waitKey(100);
 
 
 	///////////////////////funkcija za povazave 5
-	//narisiPovezave_V1();
+	narisiPovezave_V2(slika, seznamTock, cv::Point(0,0));
+	
+	cv::imshow("Slika", slika);
+	cv::waitKey(100);
+}
+void prepoznavaZic_V1(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve) {
+
+	cv::Mat maska;
+	izdelavaMaske_V1(slika, maska, barve);
+	
+	std::vector<cv::Point> seznamTock = prepoznavaVsehTock(maska);
+	//std::cout << seznamTock.size() << '\n';
+
+	std::vector<cv::Point> robneTocke = narisiPovezave_V3(maska, seznamTock);
+	std::cout << robneTocke.size() << '\n';
+
+	cv::line(slika, robneTocke.front(), robneTocke.back(), cv::Scalar(0, 255, 0));
+
+	cv::imshow("Slika", slika);
+	cv::waitKey(100);
 }
 
-void izdelavaMaske(cv::Mat slika, cv::Mat& maska, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve) {
+void izdelavaMaske_V0(cv::Mat slika, cv::Mat& maska, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve) {
 
 	const cv::Scalar& spodnjaMeja = barve.front().first; /////////////////// deluje samo za prvo
 	const cv::Scalar& zgornjaMeja = barve.front().second;
@@ -201,6 +222,21 @@ void izdelavaMaske(cv::Mat slika, cv::Mat& maska, const std::vector<std::pair<cv
 	cv::dilate(maska, maska, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
 	//cv::imshow("Slika", maska);
 	//cv::waitKey(0);
+}
+void izdelavaMaske_V1(cv::Mat slika, cv::Mat& maska, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve) {
+
+	const cv::Scalar& spodnjaMeja = barve.front().first; /////////////////// deluje samo za prvo
+	const cv::Scalar& zgornjaMeja = barve.front().second;
+
+	cv::Mat gauss;
+
+	cv::GaussianBlur(slika, gauss, cv::Size(3, 3), 0); ///////////////// dodaj nazaj
+	cv::inRange(gauss, spodnjaMeja, zgornjaMeja, maska);
+
+	cv::dilate(maska, maska, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+
+	cv::ximgproc::thinning(maska, maska, cv::ximgproc::ThinningTypes::THINNING_ZHANGSUEN);
+	//cv::ximgproc::thinning(maska, maska2, cv::ximgproc::ThinningTypes::THINNING_GUOHALL);
 }
 
 std::vector<cv::Point> vertikalnaPrepoznava(cv::Mat maska, int korak) {
@@ -307,7 +343,33 @@ void vertikalnaPoravnava_V1(cv::Mat maska, std::vector<cv::Point>& seznamTock) {
 	}
 }
 
+std::vector<cv::Point> prepoznavaVsehTock(cv::Mat maska) {
+
+	std::vector<cv::Point> resitev;
+
+	cv::findNonZero(maska, resitev);
+
+	auto it = std::remove_if(resitev.begin(), resitev.end(), [&](const cv::Point& tocka) {
+		const int& x = tocka.x;
+		const int& y = tocka.y;
+		return x == 0 || x == maska.cols - 1 || y == 0 || y == maska.rows - 1;
+		});
+
+	resitev.erase(it, resitev.end());
+
+	return resitev;
+}
+
 std::vector<cv::Point> zdruzitevSeznamovTock_V0(const std::vector<cv::Point>& sez1, const std::vector<cv::Point>& sez2, const int& filter) {
+
+	std::vector<cv::Point> resitev(sez1);
+
+	for (const cv::Point & tocka : sez2)
+			resitev.push_back(tocka);
+
+	return resitev;
+}
+std::vector<cv::Point> zdruzitevSeznamovTock_V1(const std::vector<cv::Point>& sez1, const std::vector<cv::Point>& sez2, const int& filter) {
 
 	std::vector<cv::Point> resitev(sez1);
 
@@ -316,6 +378,23 @@ std::vector<cv::Point> zdruzitevSeznamovTock_V0(const std::vector<cv::Point>& se
 			resitev.push_back(tocka);
 	
 	return resitev;
+}
+std::vector<cv::Point> zdruzitevSeznamovTock_V2(const std::vector<cv::Point>& sez1, const std::vector<cv::Point>& sez2, const int& filter) {
+
+	std::vector<cv::Point> resitev;
+
+	for (const cv::Point& tocka : sez1)
+		if (std::none_of(resitev.begin(), resitev.end(), [&](const cv::Point& to) {return manhattanRazdalja(tocka, to) < filter; }))
+			resitev.push_back(tocka);
+	for (const cv::Point& tocka : sez2)
+		if (std::none_of(resitev.begin(), resitev.end(), [&](const cv::Point& to) {return manhattanRazdalja(tocka, to) < filter; }))
+			resitev.push_back(tocka);
+
+	return resitev;
+}
+std::vector<cv::Point> zdruzitevSeznamovTock_V3(const std::vector<cv::Point>& sez1, const std::vector<cv::Point>& sez2, const int& filter) {
+
+	return std::vector<cv::Point>();
 }
 
 cv::Point sredinaTock_V0(const std::vector<cv::Point>& seznamTock) {
@@ -551,8 +630,61 @@ std::vector<cv::Point> narisiPovezave_V1(cv::Mat slika, const std::vector<cv::Po
 }
 std::vector<cv::Point> narisiPovezave_V2(cv::Mat slika, const std::vector<cv::Point>& seznamTock, const cv::Point& zacetnaTocka) {
 
+	std::vector<int> steviloBliznjihTock;
+
+	const int oddalnjenost = 20;
+
+	for (const cv::Point& tocka : seznamTock) {
+
+		int bliznjeTocke = 0;
+
+		for (const cv::Point& to : seznamTock) {
+
+			if (manhattanRazdalja(tocka, to) < oddalnjenost) {
+				bliznjeTocke++;
+			}
+		}
+
+		steviloBliznjihTock.push_back(bliznjeTocke);
+	}
+
+	for (int i = 0; i < steviloBliznjihTock.size(); i++) {
+		if (steviloBliznjihTock[i] < 2) {
+			std::cout << "steviloBliznjihTock: " << steviloBliznjihTock[i] << '\n';
+			cv::circle(slika, seznamTock[i], 3, cv::Scalar(255, 0, 255), -1);
+		}
+	}
+
+
 	return std::vector<cv::Point>();
 }
+std::vector<cv::Point> narisiPovezave_V3(cv::Mat maska, const std::vector<cv::Point>& seznamTock) {
+
+	std::vector<cv::Point> resitev;
+
+	for (const cv::Point& tocka : seznamTock) {
+
+		const int& x = tocka.x;
+		const int& y = tocka.y;
+
+		//if (x == 0 || x == maska.cols - 1 || y == 0 || y == maska.rows - 1)
+		//	continue;
+
+		int stSosed = 0;
+
+		for (int xx : { -1,0,1 }) {
+			for (int yy : { -1,0,1 }) {
+				stSosed += (maska.at<uchar>(cv::Point(x + xx, y + yy)) != 0);
+			}
+		}
+
+		if (stSosed == 2)
+			resitev.push_back(tocka);
+	}
+
+	return resitev;
+}
+
 std::vector<int> narediSeznamRazdalj(const std::vector<cv::Point>& seznamTock) {
 	
 	std::vector<int> resitev(seznamTock.size());

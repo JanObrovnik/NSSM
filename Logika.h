@@ -3,6 +3,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/opencv.hpp>
+#include <opencv4/opencv2/ximgproc.hpp>
 
 #include <tesseract/baseapi.h>
 #include <leptonica/allheaders.h>
@@ -12,6 +13,7 @@
 #include <string>
 #include <array>
 #include <vector>
+#include <chrono>
 
 
 
@@ -21,8 +23,10 @@ std::vector<std::pair<cv::Scalar, cv::Scalar>> prepoznavaBarv_V2(cv::Mat slika);
 
 
 void prepoznavaZic_V0(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve);
+void prepoznavaZic_V1(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve);
 
-void izdelavaMaske(cv::Mat slika, cv::Mat& maska, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve);
+void izdelavaMaske_V0(cv::Mat slika, cv::Mat& maska, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve);
+void izdelavaMaske_V1(cv::Mat slika, cv::Mat& maska, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve);
 
 std::vector<cv::Point> vertikalnaPrepoznava(cv::Mat maska, int korak);
 void horizontalnaPoravnava_V0(cv::Mat maska, std::vector<cv::Point>& seznamTock); //- stara verzija
@@ -31,7 +35,12 @@ void horizontalnaPoravnava_V1(cv::Mat maska, std::vector<cv::Point>& seznamTock)
 std::vector<cv::Point> horizontalnaPrepoznava(cv::Mat maska, int korak);
 void vertikalnaPoravnava_V1(cv::Mat maska, std::vector<cv::Point>& seznamTock);
 
+std::vector<cv::Point> prepoznavaVsehTock(cv::Mat maska);
+
 std::vector<cv::Point> zdruzitevSeznamovTock_V0(const std::vector<cv::Point>& sez1, const std::vector<cv::Point>& sez2, const int& filter);
+std::vector<cv::Point> zdruzitevSeznamovTock_V1(const std::vector<cv::Point>& sez1, const std::vector<cv::Point>& sez2, const int& filter);
+std::vector<cv::Point> zdruzitevSeznamovTock_V2(const std::vector<cv::Point>& sez1, const std::vector<cv::Point>& sez2, const int& filter);
+std::vector<cv::Point> zdruzitevSeznamovTock_V3(const std::vector<cv::Point>& sez1, const std::vector<cv::Point>& sez2, const int& filter);
 
 cv::Point sredinaTock_V0(const std::vector<cv::Point>& seznamTock); //- stara verzija
 inline cv::Point sredinaTock_V1(const std::vector<cv::Point>::const_iterator& it1, const std::vector<cv::Point>::const_iterator& it2);
@@ -43,6 +52,7 @@ void skrajneTocke(cv::Mat maska, const cv::Point& tocka, cv::Point& desnaTocka, 
 std::vector<cv::Point> narisiPovezave_V0(cv::Mat slika, const std::vector<cv::Point>& seznamTock, const cv::Point& zacetnaTocka);
 std::vector<cv::Point> narisiPovezave_V1(cv::Mat slika, const std::vector<cv::Point>& seznamTock, const cv::Point& zacetnaTocka);
 std::vector<cv::Point> narisiPovezave_V2(cv::Mat slika, const std::vector<cv::Point>& seznamTock, const cv::Point& zacetnaTocka);
+std::vector<cv::Point> narisiPovezave_V3(cv::Mat maska, const std::vector<cv::Point>& seznamTock);
 std::vector<int> narediSeznamRazdalj(const std::vector<cv::Point>& seznamTock);
 
 
