@@ -25,9 +25,11 @@ std::vector<std::pair<cv::Scalar, cv::Scalar>> prepoznavaBarv_V2(cv::Mat slika);
 void prepoznavaZic_V0(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve);
 void prepoznavaZic_V1(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve);
 void prepoznavaZic_V2(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve);
+void prepoznavaZic_V3(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve);
 
 void izdelavaMaske_V0(cv::Mat slika, cv::Mat& maska, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve);
 void izdelavaMaske_V1(cv::Mat slika, cv::Mat& maska, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve);
+void izdelavaMaske_V2(cv::Mat slika, cv::Mat& maska, const std::pair<cv::Scalar, cv::Scalar>& barva);
 
 std::vector<cv::Point> vertikalnaPrepoznava(cv::Mat maska, int korak);
 void horizontalnaPoravnava_V0(cv::Mat maska, std::vector<cv::Point>& seznamTock); //- stara verzija

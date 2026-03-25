@@ -245,6 +245,55 @@ void prepoznavaZic_V2(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv:
 		cv::waitKey(100);
 	}
 }
+void prepoznavaZic_V3(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve) {
+
+	cv::Mat slikaKopija;
+	slika.copyTo(slikaKopija);
+
+	for (const std::pair<cv::Scalar, cv::Scalar>& barva : barve) {
+
+		cv::Mat maska;
+		izdelavaMaske_V2(slikaKopija, maska, barva);
+
+		std::vector<std::vector<cv::Point>> konture;
+		std::vector<cv::Vec4i> hierarchy;
+		cv::findContours(maska, konture, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+		std::vector<cv::Point> seznamKoncev;
+
+		for (const auto& kontura : konture) {
+
+			cv::Mat konturnaMaska = cv::Mat::zeros(maska.size(), CV_8UC1);
+			cv::drawContours(konturnaMaska, std::vector<std::vector<cv::Point>>{kontura}, -1, cv::Scalar(255), -1);
+
+			cv::Mat delnaMaska;
+			maska.copyTo(delnaMaska, konturnaMaska);
+
+			std::vector<cv::Point> seznamTock = prepoznavaVsehTock(delnaMaska);
+
+			std::vector<cv::Point> robneTocke = narisiPovezave_V3(delnaMaska, seznamTock);
+
+			seznamKoncev.push_back(robneTocke.front()); /////////////////// mogoce drugacen kontejner
+			seznamKoncev.push_back(robneTocke.back());
+			cv::line(slika, robneTocke.front(), robneTocke.back(), cv::Scalar(0, 255, 0));
+		}
+
+		//std::cout << "seznamKoncev.size(): " << seznamKoncev.size() << '\n';
+
+		if (seznamKoncev.size() > 2) {
+
+			std::vector<cv::Point> seznamPovezavKoncev = narisiPovezaveKoncev_V0(seznamKoncev); /////////////////////////////
+
+			for (int i = 1; i < seznamPovezavKoncev.size(); i += 2) {
+				//std::cout << seznamPovezavKoncev[i - 1] << ' ' << seznamPovezavKoncev[i] << '\n';
+				cv::arrowedLine(slika, seznamPovezavKoncev[i - 1], seznamPovezavKoncev[i], cv::Scalar(153, 0, 102)); ///////////////
+			}
+		}
+
+		cv::imshow("Slika", slika);
+		cv::waitKey(1000);
+	}
+}
 
 void izdelavaMaske_V0(cv::Mat slika, cv::Mat& maska, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve) {
 
@@ -272,6 +321,21 @@ void izdelavaMaske_V1(cv::Mat slika, cv::Mat& maska, const std::vector<std::pair
 
 	const cv::Scalar& spodnjaMeja = barve.front().first; /////////////////// deluje samo za prvo
 	const cv::Scalar& zgornjaMeja = barve.front().second;
+
+	cv::Mat gauss;
+
+	cv::GaussianBlur(slika, gauss, cv::Size(3, 3), 0);
+	cv::inRange(gauss, spodnjaMeja, zgornjaMeja, maska);
+
+	cv::dilate(maska, maska, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+
+	cv::ximgproc::thinning(maska, maska, cv::ximgproc::ThinningTypes::THINNING_ZHANGSUEN);
+	//cv::ximgproc::thinning(maska, maska2, cv::ximgproc::ThinningTypes::THINNING_GUOHALL);
+}
+void izdelavaMaske_V2(cv::Mat slika, cv::Mat& maska, const std::pair<cv::Scalar, cv::Scalar>& barva) {
+
+	const cv::Scalar& spodnjaMeja = barva.first;
+	const cv::Scalar& zgornjaMeja = barva.second;
 
 	cv::Mat gauss;
 
@@ -458,8 +522,7 @@ cv::Point sredinaTock_V0(const std::vector<cv::Point>& seznamTock) {
 inline cv::Point sredinaTock_V1(const std::vector<cv::Point>::const_iterator& it1, const std::vector<cv::Point>::const_iterator& it2) {
 	return (*it1 + *it2) / 2;
 }
-inline cv::Point sredinaTock_V1(const cv::Point& to1, const cv::Point& to2)
-{
+inline cv::Point sredinaTock_V1(const cv::Point& to1, const cv::Point& to2) {
 	return (to1 + to2) / 2;
 }
 std::vector<cv::Point> sredinaVecihTock_V0(const std::vector<cv::Point>& seznamTock) {
@@ -748,6 +811,9 @@ std::vector<int> narediSeznamRazdalj(const std::vector<cv::Point>& seznamTock) {
 }
 
 std::vector<cv::Point> narisiPovezaveKoncev_V0(const std::vector<cv::Point>& seznamTock) {
+
+	if (seznamTock.size() < 4)
+		return seznamTock;
 
 	std::vector<cv::Point> resitev;
 
