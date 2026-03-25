@@ -13,8 +13,22 @@
 #include <string>
 #include <array>
 #include <vector>
+#include <map>
 #include <chrono>
 
+
+//bool operator==(cv::Point const& to1, cv::Point const& to2);
+//bool operator<(cv::Point const& to1, cv::Point const& to2);
+//bool operator==(cv::Point& to1, cv::Point& to2);
+//bool operator<(cv::Point& to1, cv::Point& to2);
+
+class Tocka {
+public:
+	int x, y;
+	Tocka() : x(0), y(0) {}
+	Tocka(int x, int y) : x(x), y(y) {}
+	Tocka(cv::Point tocka) : x(tocka.x), y(tocka.y) {}
+};
 
 
 std::vector<std::pair<cv::Scalar, cv::Scalar>> prepoznavaBarv_V0(cv::Mat slika);
@@ -59,6 +73,7 @@ std::vector<cv::Point> narisiPovezave_V3(cv::Mat maska, const std::vector<cv::Po
 std::vector<int> narediSeznamRazdalj(const std::vector<cv::Point>& seznamTock);
 
 std::vector<cv::Point> narisiPovezaveKoncev_V0(const std::vector<cv::Point>& seznamTock);
+std::vector<cv::Point> narisiProstaKonca_V0(const std::vector<cv::Point>& seznamTock);
 
 
 void prepoznajTekst_V0(cv::Mat slika, const int razsiritev = 10);

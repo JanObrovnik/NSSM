@@ -1,6 +1,29 @@
 #include "Logika.h"
 
 
+//bool operator==(const cv::Point& to1, const cv::Point& to2) {
+//	return to1.x == to2.x && to1.y == to2.y;
+//}
+//bool operator<(const cv::Point& to1, const cv::Point& to2) {
+//	return (to1.x < to2.x) || (to1.x == to2.x && to1.y < to2.y);
+//}
+//bool operator==(cv::Point to1, cv::Point to2) {
+//	return to1.x == to2.x && to1.y == to2.y;
+//}
+//bool operator<(cv::Point to1, cv::Point to2) {
+//	return (to1.x < to2.x) || (to1.x == to2.x && to1.y < to2.y);
+//}
+bool operator==(const Tocka& to1, const Tocka& to2) {
+	return to1.x == to2.x && to1.y == to2.y;
+}
+bool operator< (const Tocka& to1, const Tocka& to2) {
+	return (to1.x < to2.x) || (to1.x == to2.x && to1.y < to2.y);
+}
+std::ostream& operator<<(std::ostream& os, const Tocka& to) {
+	return os << '[' << to.x << ',' << to.y << ']';
+}
+
+
 std::vector<std::pair<cv::Scalar, cv::Scalar>> prepoznavaBarv_V0(cv::Mat slika) {
 
 	std::vector<std::pair<cv::Scalar, cv::Scalar>> resitev;
@@ -280,15 +303,25 @@ void prepoznavaZic_V3(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv:
 
 		//std::cout << "seznamKoncev.size(): " << seznamKoncev.size() << '\n';
 
+		std::vector<cv::Point> prostaKonca;
+
 		if (seznamKoncev.size() > 2) {
 
-			std::vector<cv::Point> seznamPovezavKoncev = narisiPovezaveKoncev_V0(seznamKoncev); /////////////////////////////
+			std::vector<cv::Point> seznamPovezavKoncev = narisiPovezaveKoncev_V0(seznamKoncev);
 
 			for (int i = 1; i < seznamPovezavKoncev.size(); i += 2) {
 				//std::cout << seznamPovezavKoncev[i - 1] << ' ' << seznamPovezavKoncev[i] << '\n';
 				cv::arrowedLine(slika, seznamPovezavKoncev[i - 1], seznamPovezavKoncev[i], cv::Scalar(153, 0, 102)); ///////////////
 			}
+
+			prostaKonca = narisiProstaKonca_V0(seznamPovezavKoncev);
 		}
+		else {
+			prostaKonca = seznamKoncev;
+		}
+
+		cv::circle(slika, prostaKonca.front(), 5, cv::Scalar(0, 0, 0), -1);
+		cv::circle(slika, prostaKonca.back(), 5, cv::Scalar(0, 0, 0), -1);
 
 		cv::imshow("Slika", slika);
 		cv::waitKey(1000);
@@ -839,6 +872,31 @@ std::vector<cv::Point> narisiPovezaveKoncev_V0(const std::vector<cv::Point>& sez
 		resitev.push_back(seznamTock[i]);
 		resitev.push_back(seznamTock[minRazdaljaIndex]);
 	}
+
+	return resitev;
+}
+std::vector<cv::Point> narisiProstaKonca_V0(const std::vector<cv::Point>& seznamTock) {
+
+	std::vector<cv::Point> resitev;
+
+	std::map<const Tocka, int> mapaTock;
+
+	for (const cv::Point& tocka : seznamTock) {
+		mapaTock[tocka]++;
+	}
+
+	for (const std::pair<const Tocka, int>& par : mapaTock) {
+		//std::cout << par.first << ": " << par.second << '\n';
+		if (par.second == 1)
+			resitev.push_back(cv::Point(par.first.x, par.first.y));
+	}
+
+	//for (int i = 1; i < seznamTock.size(); i += 2) {
+	//	std::cout << seznamTock[i - 1] << ' ' << seznamTock[i] << '\n';
+	//
+	//	//mapaTock[seznamTock[i-1]]++;
+	//	//mapaTock[seznamTock[i]]++;
+	//}
 
 	return resitev;
 }
