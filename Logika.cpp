@@ -314,7 +314,7 @@ void prepoznavaZic_V3(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv:
 				cv::arrowedLine(slika, seznamPovezavKoncev[i - 1], seznamPovezavKoncev[i], cv::Scalar(153, 0, 102)); ///////////////
 			}
 
-			prostaKonca = narisiProstaKonca_V0(seznamPovezavKoncev);
+			prostaKonca = narisiProstaKonca0_V0(seznamPovezavKoncev);
 		}
 		else {
 			prostaKonca = seznamKoncev;
@@ -323,9 +323,11 @@ void prepoznavaZic_V3(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv:
 		cv::circle(slika, prostaKonca.front(), 5, cv::Scalar(0, 0, 0), -1);
 		cv::circle(slika, prostaKonca.back(), 5, cv::Scalar(0, 0, 0), -1);
 
-		cv::imshow("Slika", slika);
-		cv::waitKey(1000);
+		//cv::imshow("Slika", slika);
+		//cv::waitKey(1000);
 	}
+
+	cv::imshow("Slika", slika);
 }
 
 void izdelavaMaske_V0(cv::Mat slika, cv::Mat& maska, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve) {
@@ -830,7 +832,6 @@ std::vector<cv::Point> narisiPovezave_V3(cv::Mat maska, const std::vector<cv::Po
 
 	return resitev;
 }
-
 std::vector<int> narediSeznamRazdalj(const std::vector<cv::Point>& seznamTock) {
 	
 	std::vector<int> resitev(seznamTock.size());
@@ -875,7 +876,7 @@ std::vector<cv::Point> narisiPovezaveKoncev_V0(const std::vector<cv::Point>& sez
 
 	return resitev;
 }
-std::vector<cv::Point> narisiProstaKonca_V0(const std::vector<cv::Point>& seznamTock) {
+std::vector<cv::Point> narisiProstaKonca0_V0(const std::vector<cv::Point>& seznamTock) {
 
 	std::vector<cv::Point> resitev;
 
@@ -891,12 +892,32 @@ std::vector<cv::Point> narisiProstaKonca_V0(const std::vector<cv::Point>& seznam
 			resitev.push_back(cv::Point(par.first.x, par.first.y));
 	}
 
-	//for (int i = 1; i < seznamTock.size(); i += 2) {
-	//	std::cout << seznamTock[i - 1] << ' ' << seznamTock[i] << '\n';
-	//
-	//	//mapaTock[seznamTock[i-1]]++;
-	//	//mapaTock[seznamTock[i]]++;
-	//}
+	if (resitev.empty()) {
+		resitev = narisiProstaKonca1_V0(seznamTock);
+	}
+
+	return resitev;
+}
+std::vector<cv::Point> narisiProstaKonca1_V0(const std::vector<cv::Point>& seznamTock) {
+
+	std::vector<cv::Point> resitev;
+
+	int maxRazdalja = 0;
+	int maxIndex = -1;
+
+	for (int i = 1; i < seznamTock.size(); i += 2) {
+		//std::cout << seznamTock[i - 1] << ' ' << seznamTock[i] << '\n';
+
+		const int novaRazdalja = manhattanRazdalja(seznamTock[i - 1], seznamTock[i]);
+
+		if (novaRazdalja > maxRazdalja) {
+			maxRazdalja = novaRazdalja;
+			maxIndex = i;
+		}
+	}
+
+	resitev.push_back(seznamTock[maxIndex]);
+	resitev.push_back(seznamTock[maxIndex - 1]);
 
 	return resitev;
 }

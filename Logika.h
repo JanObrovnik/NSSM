@@ -73,7 +73,8 @@ std::vector<cv::Point> narisiPovezave_V3(cv::Mat maska, const std::vector<cv::Po
 std::vector<int> narediSeznamRazdalj(const std::vector<cv::Point>& seznamTock);
 
 std::vector<cv::Point> narisiPovezaveKoncev_V0(const std::vector<cv::Point>& seznamTock);
-std::vector<cv::Point> narisiProstaKonca_V0(const std::vector<cv::Point>& seznamTock);
+std::vector<cv::Point> narisiProstaKonca0_V0(const std::vector<cv::Point>& seznamTock);
+std::vector<cv::Point> narisiProstaKonca1_V0(const std::vector<cv::Point>& seznamTock);
 
 
 void prepoznajTekst_V0(cv::Mat slika, const int razsiritev = 10);
