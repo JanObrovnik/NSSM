@@ -183,8 +183,6 @@ void UporabniskiVmesnik::pritisnjenGumb(const GUMB& gumb) {
 
 bool UporabniskiVmesnik::pritisnjenaTipka(const int& tipka) {
 
-	//std::cout << "tipka: " << tipka << '\n';
-
 	if (tipka == 113) // q
 		return false;
 
@@ -222,8 +220,11 @@ bool UporabniskiVmesnik::pritisnjenaTipka(const int& tipka) {
 	case 106: // j
 		pritisnjenGumb(SHRANI);
 		break;
+	case 107: // k
+		pritisnjenGumb(ZAPISI);
 
 	default:
+		//std::cout << "tipka: " << tipka << '\n';
 		break;
 	}
 
