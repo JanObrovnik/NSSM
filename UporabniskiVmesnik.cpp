@@ -68,6 +68,44 @@ void UporabniskiVmesnik::shraniSliko() {
 	cv::imwrite((izhod + "/" + std::to_string(index++) + ".jpg"), slika);
 }
 
+void UporabniskiVmesnik::shraniPovezave() {
+
+	if (seznamTextZica.empty())
+		return;
+
+	static int index = 0;
+
+	std::fstream datoteka;
+	datoteka.open(izhod + "/" + std::to_string(index++) + ".txt", std::ios::out);
+
+	for (int i = 1; i < seznamKoncevZic.size(); i+=2) {
+
+		const cv::Point& tocka1 = seznamKoncevZic[i - 1];
+		const cv::Point& tocka2 = seznamKoncevZic[i];
+
+		std::string str1, str2;
+
+		for (int i = 0; i < seznamTextZica.size(); i++) {
+			if (tocka1 == seznamTextZica[i].tockaZica) {
+				str1 = seznamTextZica[i].text;
+				if (str1.empty())
+					str1 = "*neprepoznano* ";
+				str1.pop_back();
+			}
+			if (tocka2 == seznamTextZica[i].tockaZica) {
+				str2 = seznamTextZica[i].text;
+				if (str2.empty())
+					str2 = "*neprepoznano* ";
+				str2.pop_back();
+			}
+		}
+
+		datoteka << str1 << " <-> " << str2 << '\n';
+	}
+
+	datoteka.close();
+}
+
 
 void UporabniskiVmesnik::onMouse(int dogodek, int x, int y, int flags, void* userdata) {
 
@@ -121,7 +159,7 @@ void UporabniskiVmesnik::pritisnjenGumb(const GUMB& gumb) {
 		break;
 
 	case BERI:
-		urejenSeznamLokacijTexta = prepoznajTekst_V1(slika, seznamKoncevZic);
+		seznamTextZica = prepoznajTekst_V1(slika, seznamKoncevZic);
 		break;
 
 	case BRISI:
@@ -131,6 +169,10 @@ void UporabniskiVmesnik::pritisnjenGumb(const GUMB& gumb) {
 
 	case SHRANI:
 		shraniSliko();
+		break;
+
+	case ZAPISI:
+		shraniPovezave();
 		break;
 	
 	default:

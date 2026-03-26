@@ -5,6 +5,7 @@
 #include <opencv2/opencv.hpp>
 
 #include <iostream>
+#include <fstream>
 #include <filesystem>
 #include <string>
 #include <array>
@@ -23,6 +24,7 @@ enum GUMB {
 	BERI,
 	BRISI,
 	SHRANI,
+	ZAPISI,
 	kolicina
 };
 
@@ -38,7 +40,7 @@ private:
 	int indexTab;
 	std::vector<std::pair<cv::Scalar, cv::Scalar>> barve;
 	std::vector<cv::Point> seznamKoncevZic;
-	std::vector<TextZica> urejenSeznamLokacijTexta;
+	std::vector<TextZica> seznamTextZica;
 
 public:
 	UporabniskiVmesnik(std::string& vhod, std::string& izhod);
@@ -48,6 +50,7 @@ private:
 
 	void naloziSliko(const GUMB& gumb = VSI);
 	void shraniSliko();
+	void shraniPovezave();
 
 	static void onMouse(int dogodek, int x, int y, int flags, void* userdata);
 	void nadzorKontrol(int dogodek, int x, int y, int flags);
