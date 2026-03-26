@@ -91,25 +91,14 @@ std::vector<cv::Point> prepoznavaZic_V3(cv::Mat slika, const std::vector<std::pa
 
 			std::vector<cv::Point> robneTocke = narisiPovezave_V3(delnaMaska, seznamTock);
 
-			seznamKoncev.push_back(robneTocke.front()); /////////////////// mogoce drugacen kontejner
+			seznamKoncev.push_back(robneTocke.front());
 			seznamKoncev.push_back(robneTocke.back());
-			cv::line(slika, robneTocke.front(), robneTocke.back(), cv::Scalar(0, 255, 0));
 		}
-
-		//std::cout << "seznamKoncev.size(): " << seznamKoncev.size() << '\n';
 
 		std::vector<cv::Point> prostaKonca;
 
 		if (seznamKoncev.size() > 2) {
-
-			std::vector<cv::Point> seznamPovezavKoncev = narisiPovezaveKoncev_V0(seznamKoncev);
-
-			for (int i = 1; i < seznamPovezavKoncev.size(); i += 2) {
-				//std::cout << seznamPovezavKoncev[i - 1] << ' ' << seznamPovezavKoncev[i] << '\n';
-				cv::arrowedLine(slika, seznamPovezavKoncev[i - 1], seznamPovezavKoncev[i], cv::Scalar(153, 0, 102)); ///////////////
-			}
-
-			prostaKonca = narisiProstaKonca0_V0(seznamPovezavKoncev);
+			prostaKonca = narisiProstaKonca0_V0(narisiPovezaveKoncev_V0(seznamKoncev));
 		}
 		else {
 			prostaKonca = seznamKoncev;
@@ -117,6 +106,7 @@ std::vector<cv::Point> prepoznavaZic_V3(cv::Mat slika, const std::vector<std::pa
 
 		cv::circle(slika, prostaKonca.front(), 5, cv::Scalar(0, 0, 0), -1);
 		cv::circle(slika, prostaKonca.back(), 5, cv::Scalar(0, 0, 0), -1);
+		cv::line(slika, prostaKonca.front(), prostaKonca.back(), cv::Scalar(255, 0, 255), 2);
 
 		resitev.push_back(prostaKonca.front());
 		resitev.push_back(prostaKonca.back());
@@ -178,9 +168,6 @@ std::vector<cv::Point> narisiPovezave_V3(cv::Mat maska, const std::vector<cv::Po
 		const int& x = tocka.x;
 		const int& y = tocka.y;
 
-		//if (x == 0 || x == maska.cols - 1 || y == 0 || y == maska.rows - 1)
-		//	continue;
-
 		int stSosed = -1;
 
 		for (int xx : { -1,0,1 }) {
@@ -239,14 +226,12 @@ std::vector<cv::Point> narisiProstaKonca0_V0(const std::vector<cv::Point>& sezna
 	}
 
 	for (const std::pair<const Tocka, int>& par : mapaTock) {
-		//std::cout << par.first << ": " << par.second << '\n';
 		if (par.second == 1)
 			resitev.push_back(cv::Point(par.first.x, par.first.y));
 	}
 
-	if (resitev.empty()) {
+	if (resitev.empty())
 		resitev = narisiProstaKonca1_V0(seznamTock);
-	}
 
 	return resitev;
 }
@@ -258,7 +243,6 @@ std::vector<cv::Point> narisiProstaKonca1_V0(const std::vector<cv::Point>& sezna
 	int maxIndex = -1;
 
 	for (int i = 1; i < seznamTock.size(); i += 2) {
-		//std::cout << seznamTock[i - 1] << ' ' << seznamTock[i] << '\n';
 
 		const int novaRazdalja = manhattanRazdalja(seznamTock[i - 1], seznamTock[i]);
 
@@ -315,12 +299,10 @@ std::vector<TextZica> prepoznajTekst_V1(cv::Mat slika, const std::vector<cv::Poi
 			if (novY <= 0) novY = 0;
 			if ((novW + novX) >= width) novW = width - novX;
 			if ((novH + novY) >= height) novH = height - novY;
-			//std::cout << "dimenzije : " << novX << ' ' << novY << ' ' << novW << ' ' << novH << '\n';
 
 			ocr.SetRectangle(novX, novY, novW, novH);
 			std::string outText = std::string(ocr.GetUTF8Text());
 			seznamStringTexta.push_back(outText);
-			//std::cout << "zaznan text: " << outText << '\n' << '\n';
 
 			cv::rectangle(slika, cv::Rect(novX, novY, novW, novH), cv::Scalar(0, 255, 0));
 		}
@@ -353,9 +335,6 @@ std::vector<int> poveziBliznjeTocke_V0(cv::Mat slika, const std::vector<cv::Poin
 
 	std::vector<int> resitev;
 	resitev.reserve(seznamTock.size());
-
-	//std::cout << "vel: " << seznamTock.size() << '\n';
-	//std::cout << "vel: " << seznamTockTexta.size() << '\n';
 
 	for (const cv::Point& tocka : seznamTock) {
 

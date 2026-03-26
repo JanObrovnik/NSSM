@@ -116,11 +116,9 @@ void UporabniskiVmesnik::onMouse(int dogodek, int x, int y, int flags, void* use
 void UporabniskiVmesnik::nadzorKontrol(int dogodek, int x, int y, int flags) {
 
 	if (dogodek == cv::EVENT_LBUTTONDOWN || dogodek == cv::EVENT_LBUTTONDBLCLK) {
-
 		pritisnjenGumb(static_cast<GUMB>(x / (kontrolnaPlosca.cols / GUMB::kolicina)));
 	}
 	else if (dogodek == cv::EVENT_LBUTTONUP) {
-
 		pritisnjenGumb();
 	}
 }
@@ -136,7 +134,7 @@ void UporabniskiVmesnik::pritisnjenGumb(const GUMB& gumb) {
 		break;
 	
 	case LEVI:
-		barve.clear(); ////////////////// mogoc brezveze
+		barve.clear();
 		seznamKoncevZic.clear();
 		naloziSliko(LEVI);
 		break;
@@ -245,7 +243,6 @@ std::vector<std::string> preberiMapo(std::string pot) {
 
 	for (const auto& entry : std::filesystem::directory_iterator(pot)) {
 		if (entry.is_regular_file()) {
-			//std::cout << pot + "/" + entry.path().filename().string() << '\n';
 			resitev.push_back(pot + "/" + entry.path().filename().string());
 		}
 		else {

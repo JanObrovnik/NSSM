@@ -25,3 +25,6 @@
 
 * `j`:	Shrani trenutno sliko
 ![Kontrolna plosca](/Resources/6.jpg)
+
+* `k`:	Shrani odcitane povezave
+![Kontrolna plosca](/Resources/7.jpg)
