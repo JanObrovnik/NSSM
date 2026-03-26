@@ -99,11 +99,13 @@ void UporabniskiVmesnik::pritisnjenGumb(const GUMB& gumb) {
 	
 	case LEVI:
 		barve.clear(); ////////////////// mogoc brezveze
+		seznamKoncevZic.clear();
 		naloziSliko(LEVI);
 		break;
 	
 	case DESNI:
 		barve.clear();
+		seznamKoncevZic.clear();
 		naloziSliko(DESNI);
 		break;
 	
@@ -114,14 +116,16 @@ void UporabniskiVmesnik::pritisnjenGumb(const GUMB& gumb) {
 
 	case ZICA:
 		if (barve.empty()) break;
-		prepoznavaZic_V3(slika, barve);
+		seznamKoncevZic.clear();
+		seznamKoncevZic = prepoznavaZic_V3(slika, barve);
 		break;
 
 	case BERI:
-		prepoznajTekst_V0(slika);
+		urejenSeznamLokacijTexta = prepoznajTekst_V1(slika, seznamKoncevZic);
 		break;
 
 	case BRISI:
+		seznamKoncevZic.clear();
 		naloziSliko(VSI);
 		break;
 

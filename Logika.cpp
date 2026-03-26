@@ -268,7 +268,9 @@ void prepoznavaZic_V2(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv:
 		cv::waitKey(100);
 	}
 }
-void prepoznavaZic_V3(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve) {
+std::vector<cv::Point> prepoznavaZic_V3(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve) {
+
+	std::vector<cv::Point> resitev;
 
 	cv::Mat slikaKopija;
 	slika.copyTo(slikaKopija);
@@ -323,11 +325,13 @@ void prepoznavaZic_V3(cv::Mat slika, const std::vector<std::pair<cv::Scalar, cv:
 		cv::circle(slika, prostaKonca.front(), 5, cv::Scalar(0, 0, 0), -1);
 		cv::circle(slika, prostaKonca.back(), 5, cv::Scalar(0, 0, 0), -1);
 
-		//cv::imshow("Slika", slika);
-		//cv::waitKey(1000);
+		resitev.push_back(prostaKonca.front());
+		resitev.push_back(prostaKonca.back());
 	}
 
 	cv::imshow("Slika", slika);
+
+	return resitev;
 }
 
 void izdelavaMaske_V0(cv::Mat slika, cv::Mat& maska, const std::vector<std::pair<cv::Scalar, cv::Scalar>>& barve) {
@@ -969,4 +973,108 @@ void prepoznajTekst_V0(cv::Mat slika, const int razsiritev) {
 	cv::imshow("Slika", slika);
 
 	ocr.End();
+}
+std::vector<TextZica> prepoznajTekst_V1(cv::Mat slika, const std::vector<cv::Point>& seznamTock, const int razsiritev) {
+
+	std::vector<TextZica> resitev;
+
+	cv::Mat obdelanaSlika;
+
+	cv::cvtColor(slika, obdelanaSlika, cv::COLOR_BGR2GRAY);
+
+	tesseract::TessBaseAPI ocr = tesseract::TessBaseAPI();
+	ocr.Init("C:/Dev/vcpkg/buildtrees/tesseract/tessdata", "eng", tesseract::OEM_DEFAULT);
+	ocr.SetPageSegMode(tesseract::PSM_AUTO);
+	ocr.SetImage(obdelanaSlika.data, obdelanaSlika.cols, obdelanaSlika.rows, 1, obdelanaSlika.step);
+
+	Boxa* boxes = ocr.GetWords(NULL);
+	if (boxes) {
+
+		std::vector<cv::Point> seznamTockTexta;
+		std::vector<std::string> seznamStringTexta;
+		std::vector<int> seznamIndexovTexta;
+
+		const int count = boxaGetCount(boxes);
+		for (int i = 0; i < count; ++i) {
+
+			int x, y, w, h;
+			boxaGetBoxGeometry(boxes, i, &x, &y, &w, &h);
+
+			seznamTockTexta.push_back(cv::Point(x + w / 2, y + h / 2));
+
+			int width = obdelanaSlika.cols;
+			int height = obdelanaSlika.rows;
+
+			int novX = x - razsiritev;
+			int novY = y - razsiritev;
+			int novW = w + 2 * razsiritev;
+			int novH = h + 2 * razsiritev;
+
+			if (novX <= 0) novX = 0;
+			if (novY <= 0) novY = 0;
+			if ((novW + novX) >= width) novW = width - novX;
+			if ((novH + novY) >= height) novH = height - novY;
+			//std::cout << "dimenzije : " << novX << ' ' << novY << ' ' << novW << ' ' << novH << '\n';
+
+			ocr.SetRectangle(novX, novY, novW, novH);
+			std::string outText = std::string(ocr.GetUTF8Text());
+			seznamStringTexta.push_back(outText);
+			//std::cout << "zaznan text: " << outText << '\n' << '\n';
+
+			cv::rectangle(slika, cv::Rect(novX, novY, novW, novH), cv::Scalar(0, 255, 0));
+		}
+		boxaDestroy(&boxes);
+
+		seznamIndexovTexta = poveziBliznjeTocke_V0(slika, seznamTock, seznamTockTexta);
+
+		TextZica textZica;
+
+		for (int i = 0; i < seznamTock.size(); i++) {
+
+			textZica.tockaZica = seznamTock[i];
+			textZica.tockaText = seznamTockTexta[seznamIndexovTexta[i]];
+			textZica.text = seznamStringTexta[seznamIndexovTexta[i]];
+
+			resitev.push_back(textZica);
+		}
+	}
+
+
+	for (const TextZica& tz : resitev) cv::arrowedLine(slika, tz.tockaZica, tz.tockaText, cv::Scalar(255, 0, 255), 2);
+
+
+	cv::imshow("Slika", slika);
+
+	ocr.End();
+
+	return resitev;
+}
+
+std::vector<int> poveziBliznjeTocke_V0(cv::Mat slika, const std::vector<cv::Point>& seznamTock, const std::vector<cv::Point>& seznamTockTexta) {
+
+	std::vector<int> resitev;
+	resitev.reserve(seznamTock.size());
+
+	//std::cout << "vel: " << seznamTock.size() << '\n';
+	//std::cout << "vel: " << seznamTockTexta.size() << '\n';
+
+	for (const cv::Point& tocka : seznamTock) {
+
+		int minIndex = 0;
+		int minRazdaja = manhattanRazdalja(tocka, seznamTockTexta[minIndex]);
+
+		for (int i = 1; i < seznamTockTexta.size(); i++) {
+
+			const int novaRazdalja = manhattanRazdalja(tocka, seznamTockTexta[i]);
+
+			if (novaRazdalja < minRazdaja) {
+				minRazdaja = novaRazdalja;
+				minIndex = i;
+			}
+		}
+
+		resitev.push_back(minIndex);
+	}
+
+	return resitev;
 }
