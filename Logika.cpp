@@ -16,7 +16,7 @@ std::vector<std::pair<cv::Scalar, cv::Scalar>> prepoznavaBarv_V2(cv::Mat slika) 
 
 	std::vector<std::pair<cv::Scalar, cv::Scalar>> resitev;
 
-	std::vector<cv::Scalar> dataBaza{
+	static std::vector<cv::Scalar> barvnaBaza{
 		cv::Scalar(32,29,234),
 		cv::Scalar(199,72,65),
 		cv::Scalar(5,240,252),
@@ -25,21 +25,24 @@ std::vector<std::pair<cv::Scalar, cv::Scalar>> prepoznavaBarv_V2(cv::Mat slika) 
 		cv::Scalar(162,72,163),
 	};
 
+	const int dimenzijaSlike = slika.cols * slika.rows;
+
 	cv::Mat slikaObdelana, maska;
 
 	cv::GaussianBlur(slika, slikaObdelana, cv::Size(3, 3), 0);
 
 	int polmerOknaBarve = 10; /////////////// mogoc vecji
 
-	for (const cv::Scalar& meja : dataBaza) {
+	for (const cv::Scalar& meja : barvnaBaza) {
 
 		cv::Scalar spodnja(meja[0] - polmerOknaBarve, meja[1] - polmerOknaBarve, meja[2] - polmerOknaBarve);
 		cv::Scalar zgornja(meja[0] + polmerOknaBarve, meja[1] + polmerOknaBarve, meja[2] + polmerOknaBarve);
 
 		cv::inRange(slikaObdelana, spodnja, zgornja, maska);
 
-		if (cv::countNonZero(maska) != 0) {
-
+		if (cv::countNonZero(maska) > (dimenzijaSlike / 600)) { //////////////// izloèi najmanše elemte
+			//std::cout << cv::countNonZero(maska) << '|' << (dimenzijaSlike / 600) << '\n';
+			
 			cv::imshow("Slika", maska);
 
 			int k;
@@ -80,7 +83,11 @@ std::vector<cv::Point> prepoznavaZic_V3(cv::Mat slika, const std::vector<std::pa
 		std::vector<cv::Point> seznamKoncev;
 
 		for (const auto& kontura : konture) {
-
+			
+			//std::cout << kontura.size() << '\n';
+			if (kontura.size() < 20)
+				continue;
+			
 			cv::Mat konturnaMaska = cv::Mat::zeros(maska.size(), CV_8UC1);
 			cv::drawContours(konturnaMaska, std::vector<std::vector<cv::Point>>{kontura}, -1, cv::Scalar(255), -1);
 
