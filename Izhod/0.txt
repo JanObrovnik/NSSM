@@ -1,3 +1,5 @@
-VHODO <-> IZHOD1
-VHOD2 <-> IZHODO
-VHOD1 <-> IZHOD2
+Izhod1 <-> Vhod3
+Vhod2 <-> Izhod3
+Vhod4 <-> Izhod4
+Vhod0 <-> Izhod2
+Vhod1 <-> Izhod0

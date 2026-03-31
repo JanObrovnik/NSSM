@@ -1,4 +1,5 @@
-*neprepoznano* <-> *neprepoznano*
-*neprepoznano* <-> *neprepoznano*
-*neprepoznano* <-> *neprepoznano*
-*neprepoznano* <-> *neprepoznano*
+Izhod1 <-> Vhod3
+Vhod2 <-> Izhod3
+Vhod4 <-> Izhod4
+Vhod0 <-> Izhod2
+Vhod1 <-> Izhod0

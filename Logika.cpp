@@ -16,31 +16,39 @@ std::vector<std::pair<cv::Scalar, cv::Scalar>> prepoznavaBarv_V2(cv::Mat slika) 
 
 	std::vector<std::pair<cv::Scalar, cv::Scalar>> resitev;
 
-	static std::vector<cv::Scalar> barvnaBaza{
-		cv::Scalar(32,29,234),
-		cv::Scalar(199,72,65),
-		cv::Scalar(5,240,252),
-		cv::Scalar(22,0,136),
-		cv::Scalar(73,177,35),
-		cv::Scalar(162,72,163),
+	static std::vector<std::pair<cv::Scalar, cv::Scalar>> barvnaBaza{
+		{cv::Scalar(130,32,32),cv::Scalar(150,255,255)},	// vijocna
+		{cv::Scalar(107,160,80),cv::Scalar(118,255,255)},	// modra
+		{cv::Scalar(91,110,68),cv::Scalar(104,255,255)},	// zelena
+		{cv::Scalar(23,159,114),cv::Scalar(43,234,233)},	// rumena
+		{cv::Scalar(11,138,160),cv::Scalar(17,255,255)},	// oranzna
+		{cv::Scalar(0,138,40),cv::Scalar(10,255,255)},		// rdeca
+		{cv::Scalar(7,50,15),cv::Scalar(24,175,255)},		// rjava
+		////{cv::Scalar(0,0,0),cv::Scalar(120,153,100)},		   // crna
+		////{cv::Scalar(72,173,14),cv::Scalar(180,255,40)},	   // bela
+		////{cv::Scalar(90,68,36),cv::Scalar(139,255,106)},	   // riva
+		{cv::Scalar(0,32,32),cv::Scalar(8,200,232)},
+		{cv::Scalar(10,89,142),cv::Scalar(18,205,241)},
+		{cv::Scalar(20,72,151),cv::Scalar(29,205,255)},
+		{cv::Scalar(81,30,56),cv::Scalar(91,150,204)},
+		{cv::Scalar(110,60,20),cv::Scalar(124,255,80)},
+		{cv::Scalar(134,16,51),cv::Scalar(166,66,137)},
 	};
-
-	const int dimenzijaSlike = slika.cols * slika.rows;
 
 	cv::Mat slikaObdelana, maska;
 
-	cv::GaussianBlur(slika, slikaObdelana, cv::Size(3, 3), 0);
+	cv::GaussianBlur(slika, slikaObdelana, cv::Size(9, 9), 0);
 
-	int polmerOknaBarve = 10; /////////////// mogoc vecji
+	cv::cvtColor(slikaObdelana, slikaObdelana, cv::COLOR_BGR2HSV);
 
-	for (const cv::Scalar& meja : barvnaBaza) {
+	for (const std::pair<cv::Scalar, cv::Scalar>& meja : barvnaBaza) {
 
-		cv::Scalar spodnja(meja[0] - polmerOknaBarve, meja[1] - polmerOknaBarve, meja[2] - polmerOknaBarve);
-		cv::Scalar zgornja(meja[0] + polmerOknaBarve, meja[1] + polmerOknaBarve, meja[2] + polmerOknaBarve);
+		const cv::Scalar& spodnja = meja.first;
+		const cv::Scalar& zgornja = meja.second;
 
 		cv::inRange(slikaObdelana, spodnja, zgornja, maska);
 
-		if (cv::countNonZero(maska) > (dimenzijaSlike / 600)) { //////////////// izloèi najmanše elemte
+		if (cv::countNonZero(maska) > 0) {
 			//std::cout << cv::countNonZero(maska) << '|' << (dimenzijaSlike / 600) << '\n';
 			
 			cv::imshow("Slika", maska);
@@ -85,7 +93,7 @@ std::vector<cv::Point> prepoznavaZic_V3(cv::Mat slika, const std::vector<std::pa
 		for (const auto& kontura : konture) {
 			
 			//std::cout << kontura.size() << '\n';
-			if (kontura.size() < 20)
+			if (kontura.size() < 24)
 				continue;
 			
 			cv::Mat konturnaMaska = cv::Mat::zeros(maska.size(), CV_8UC1);
@@ -129,12 +137,16 @@ void izdelavaMaske_V2(cv::Mat slika, cv::Mat& maska, const std::pair<cv::Scalar,
 	const cv::Scalar& spodnjaMeja = barva.first;
 	const cv::Scalar& zgornjaMeja = barva.second;
 
-	cv::Mat gauss;
+	cv::Mat slikaObdelana;
 
-	cv::GaussianBlur(slika, gauss, cv::Size(3, 3), 0);
-	cv::inRange(gauss, spodnjaMeja, zgornjaMeja, maska);
+	cv::GaussianBlur(slika, slikaObdelana, cv::Size(5, 5), 0);
+	cv::cvtColor(slikaObdelana, slikaObdelana, cv::COLOR_BGR2HSV);
+	cv::inRange(slikaObdelana, spodnjaMeja, zgornjaMeja, maska);
 
 	cv::dilate(maska, maska, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+	cv::erode(maska, maska, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+	//cv::erode(maska, maska, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+	//cv::dilate(maska, maska, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
 
 	cv::ximgproc::thinning(maska, maska, cv::ximgproc::ThinningTypes::THINNING_ZHANGSUEN);
 	//cv::ximgproc::thinning(maska, maska2, cv::ximgproc::ThinningTypes::THINNING_GUOHALL);
@@ -308,10 +320,12 @@ std::vector<TextZica> prepoznajTekst_V1(cv::Mat slika, const std::vector<cv::Poi
 			if ((novH + novY) >= height) novH = height - novY;
 
 			ocr.SetRectangle(novX, novY, novW, novH);
+
 			std::string outText = std::string(ocr.GetUTF8Text());
 			seznamStringTexta.push_back(outText);
 
-			cv::rectangle(slika, cv::Rect(novX, novY, novW, novH), cv::Scalar(0, 255, 0));
+			if (!outText.empty())
+				cv::rectangle(slika, cv::Rect(novX, novY, novW, novH), cv::Scalar(0, 255, 0));
 		}
 		boxaDestroy(&boxes);
 

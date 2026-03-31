@@ -61,3 +61,5 @@ private:
 
 
 std::vector<std::string> preberiMapo(std::string pot);
+
+void rocnoDolocanjeHSV(cv::Mat slika);

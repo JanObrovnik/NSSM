@@ -58,6 +58,12 @@ void UporabniskiVmesnik::naloziSliko(const GUMB& gumb) {
 	else if (index == seznamPoti.size()) index = 0;
 
 	slika = cv::imread(seznamPoti[index]);
+
+	if (slika.cols > 1248 || slika.rows > 624) {
+		double min = std::min(1248. / (double)slika.cols, 624. / (double)slika.rows);
+		cv::resize(slika, slika, cv::Size(), min, min);
+	}
+
 	cv::imshow("Slika", slika);
 }
 
@@ -251,4 +257,41 @@ std::vector<std::string> preberiMapo(std::string pot) {
 	}
 
 	return resitev;
+}
+
+void rocnoDolocanjeHSV(cv::Mat slika) {
+
+	cv::Mat slikaHSV, maska;
+
+	cv::cvtColor(slika, slikaHSV, cv::COLOR_BGR2HSV);
+
+	int hMin = 0, sMin = 0, vMin = 0, hMax = 180, sMax = 255, vMax = 255;
+
+	cv::namedWindow("Trackbars()", (1200, 250));
+	//cv::resizeWindow("Trackbars()", cv::Size(1200, 250));
+	cv::createTrackbar("hMin", "Trackbars()", &hMin, 180);
+	cv::createTrackbar("hMax", "Trackbars()", &hMax, 180);
+	cv::createTrackbar("vMin", "Trackbars()", &vMin, 255);
+	cv::createTrackbar("vMax", "Trackbars()", &vMax, 255);
+	cv::createTrackbar("sMin", "Trackbars()", &sMin, 255);
+	cv::createTrackbar("sMax", "Trackbars()", &sMax, 255);
+
+	while (true) {
+
+		cv::Scalar mejaZgornja(hMax, sMax, vMax);
+		cv::Scalar mejaSpodnja(hMin, sMin, vMin);
+
+		cv::inRange(slikaHSV, mejaSpodnja, mejaZgornja, maska);
+		cv::imshow("maska", maska);
+
+		int k = cv::waitKey(100);
+
+		if (k == 13)
+			break;
+		else if (k == 9)
+			std::cout << "h-h,v-v,s-s: " << hMin << '-' << hMax << ',' << vMin << '-' << vMax << ',' << sMin << '-' << sMax << '\n';
+	}
+
+	cv::destroyWindow("maska");
+	cv::destroyWindow("Trackbars()");
 }
