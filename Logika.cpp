@@ -48,7 +48,7 @@ std::vector<std::pair<cv::Scalar, cv::Scalar>> prepoznavaBarv_V2(cv::Mat slika) 
 
 		cv::inRange(slikaObdelana, spodnja, zgornja, maska);
 
-		if (cv::countNonZero(maska) > 0) {
+		if (cv::countNonZero(maska) > 100) {
 			//std::cout << cv::countNonZero(maska) << '|' << (dimenzijaSlike / 600) << '\n';
 			
 			cv::imshow("Slika", maska);

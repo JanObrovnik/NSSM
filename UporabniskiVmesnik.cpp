@@ -4,7 +4,8 @@
 UporabniskiVmesnik::UporabniskiVmesnik(std::string& vhod, std::string& izhod) : 
 	kontrolnaPlosca(80, 80 * GUMB::kolicina, CV_8UC3, cv::Scalar(255, 255, 255)), vhod(vhod), izhod(izhod), seznamPoti(preberiMapo(vhod)) {
 
-	seznamKontrolnihIkon = (preberiMapo("C:/Users/janob/Desktop/Faks/NapredniSenzorskiSistemi/CPP/ProjektNSSM/ProjektNSSM/Seminar/Resources"));
+	//seznamKontrolnihIkon = (preberiMapo("C:/Users/janob/Desktop/Faks/NapredniSenzorskiSistemi/CPP/ProjektNSSM/ProjektNSSM/Seminar/Resources"));
+	seznamKontrolnihIkon = (preberiMapo("Resources"));
 	std::sort(seznamKontrolnihIkon.begin(), seznamKontrolnihIkon.end());
 
 	indexTab = -1;
